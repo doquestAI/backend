@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="DoQuest.Api/Presentation.csproj" />
+  <Project Path="DoQuest.Application/Application.csproj" />
+  <Project Path="DoQuest.Domain/Domain.csproj" />
+  <Project Path="DoQuest.Infrastructure/Infrastructure.csproj" />
+  <Project Path="DoQuest.Tests/Tests.csproj" />
+</Solution>
