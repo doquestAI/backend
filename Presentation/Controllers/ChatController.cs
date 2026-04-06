@@ -1,37 +1,38 @@
-using DoQuest.Application.Common;
-using DoQuest.Application.UseCases.Chat.Commands.SendMessage;
-using Flunt.Notifications;
+using Application.Common;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.AI;
+using Presentation.Common;
+using Swashbuckle.AspNetCore.Annotations;
+using SendCommand = Application.UseCases.Chat.Commands.SendMessage.SendMessageCommand;
+using SendResponse = Application.UseCases.Chat.Commands.SendMessage.SendMessageResponse;
 
-namespace DoQuest.Api.Controllers;
+namespace Presentation.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public sealed class ChatController(IMediator mediator, ICurrentUser currentUser) : ControllerBase
+internal sealed class ChatController(IMediator mediator, ICurrentUser currentUser) : InternalControllerBase
 {
-    public sealed record SendMessageRequest(
+    internal sealed record SendMessageRequest(
         string Message,
         Guid? VestibularId,
         IEnumerable<ChatMessage>? History);
 
-    /// <summary>Sends a message to the educational chatbot with RAG.</summary>
     [HttpPost]
-    [ProducesResponseType(typeof(SendMessageResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(IReadOnlyList<Notification>), StatusCodes.Status422UnprocessableEntity)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> Send([FromBody] SendMessageRequest request, CancellationToken ct)
+    [SwaggerOperation(OperationId = "ChatSend")]
+    public async Task<IActionResult> Send(
+        [FromBody] SendMessageRequest request,
+        CancellationToken ct)
     {
-        var command = new SendMessageCommand(
+        var command = new SendCommand(
             currentUser.FirebaseUid,
             request.Message,
             request.VestibularId,
             request.History ?? []);
 
         var result = await mediator.Send(command, ct);
-        return result.IsSuccess ? Ok(result.Value) : UnprocessableEntity(result.Notifications);
+        return ToActionResult(result);
     }
 }

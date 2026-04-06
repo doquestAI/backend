@@ -1,53 +1,53 @@
-using DoQuest.Application.Common;
-using DoQuest.Application.UseCases.Users.Commands.ChangePlan;
-using DoQuest.Application.UseCases.Users.Commands.RegisterUser;
-using DoQuest.Application.UseCases.Users.Queries.GetUserProfile;
-using Flunt.Notifications;
+using Application.Common;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Presentation.Common;
+using Swashbuckle.AspNetCore.Annotations;
+using RegisterCommand = Application.UseCases.Users.Commands.RegisterUser.RegisterUserCommand;
+using RegisterResponse = Application.UseCases.Users.Commands.RegisterUser.RegisterUserResponse;
+using ChangePlanCommand = Application.UseCases.Users.Commands.ChangePlan.ChangePlanCommand;
+using ChangePlanResponse = Application.UseCases.Users.Commands.ChangePlan.ChangePlanResponse;
+using GetProfileQuery = Application.UseCases.Users.Queries.GetUserProfile.GetUserProfileQuery;
+using UserProfileDto = Application.UseCases.Users.Queries.GetUserProfile.UserProfileDto;
 
-namespace DoQuest.Api.Controllers;
+namespace Presentation.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public sealed class UsersController(IMediator mediator, ICurrentUser currentUser) : ControllerBase
+internal sealed class UsersController(IMediator mediator, ICurrentUser currentUser) : InternalControllerBase
 {
-    public sealed record RegisterUserRequest(string FirebaseUid, string Email);
-    public sealed record ChangePlanRequest(Guid NewPlanId);
+    internal sealed record RegisterUserRequest(string FirebaseUid, string Email);
+    internal sealed record ChangePlanRequest(Guid NewPlanId);
 
-    /// <summary>Registers a new user (idempotent — safe to call on every login).</summary>
     [HttpPost("register")]
     [AllowAnonymous]
-    [ProducesResponseType(typeof(RegisterUserResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(IReadOnlyList<Notification>), StatusCodes.Status422UnprocessableEntity)]
-    public async Task<IActionResult> Register([FromBody] RegisterUserRequest request, CancellationToken ct)
+    [SwaggerOperation(OperationId = "UsersRegister")]
+    public async Task<IActionResult> Register(
+        [FromBody] RegisterUserRequest request,
+        CancellationToken ct)
     {
-        var result = await mediator.Send(new RegisterUserCommand(request.FirebaseUid, request.Email), ct);
-        return result.IsSuccess ? Ok(result.Value) : UnprocessableEntity(result.Notifications);
+        var result = await mediator.Send(new RegisterCommand(request.FirebaseUid, request.Email), ct);
+        return ToActionResult(result);
     }
 
-    /// <summary>Returns the authenticated user's profile and plan details.</summary>
     [HttpGet("me")]
     [Authorize]
-    [ProducesResponseType(typeof(UserProfileDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(IReadOnlyList<Notification>), StatusCodes.Status422UnprocessableEntity)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [SwaggerOperation(OperationId = "UsersGetProfile")]
     public async Task<IActionResult> GetProfile(CancellationToken ct)
     {
-        var result = await mediator.Send(new GetUserProfileQuery(currentUser.FirebaseUid), ct);
-        return result.IsSuccess ? Ok(result.Value) : UnprocessableEntity(result.Notifications);
+        var result = await mediator.Send(new GetProfileQuery(currentUser.FirebaseUid), ct);
+        return ToActionResult(result);
     }
 
-    /// <summary>Changes the authenticated user's plan.</summary>
     [HttpPatch("me/plan")]
     [Authorize]
-    [ProducesResponseType(typeof(ChangePlanResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(IReadOnlyList<Notification>), StatusCodes.Status422UnprocessableEntity)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> ChangePlan([FromBody] ChangePlanRequest request, CancellationToken ct)
+    [SwaggerOperation(OperationId = "UsersChangePlan")]
+    public async Task<IActionResult> ChangePlan(
+        [FromBody] ChangePlanRequest request,
+        CancellationToken ct)
     {
         var result = await mediator.Send(new ChangePlanCommand(currentUser.FirebaseUid, request.NewPlanId), ct);
-        return result.IsSuccess ? Ok(result.Value) : UnprocessableEntity(result.Notifications);
+        return ToActionResult(result);
     }
 }

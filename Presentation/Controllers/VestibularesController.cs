@@ -1,22 +1,22 @@
-using DoQuest.Application.UseCases.Vestibulares.Queries.ListVestibulares;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Presentation.Common;
+using Swashbuckle.AspNetCore.Annotations;
+using ListQuery = Application.UseCases.Vestibulares.Queries.ListVestibulares.ListVestibularesQuery;
 
-namespace DoQuest.Api.Controllers;
+namespace Presentation.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public sealed class VestibularesController(IMediator mediator) : ControllerBase
+internal sealed class VestibularesController(IMediator mediator) : InternalControllerBase
 {
-    /// <summary>Lists all available vestibulares.</summary>
     [HttpGet]
-    [ProducesResponseType(typeof(IReadOnlyList<VestibularDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [SwaggerOperation(OperationId = "VestibularesList")]
     public async Task<IActionResult> List(CancellationToken ct)
     {
-        var result = await mediator.Send(new ListVestibularesQuery(), ct);
-        return result.IsSuccess ? Ok(result.Value) : UnprocessableEntity(result.Notifications);
+        var result = await mediator.Send(new ListQuery(), ct);
+        return ToActionResult(result);
     }
 }

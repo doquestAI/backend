@@ -1,9 +1,9 @@
-using DoQuest.Application.Common;
+using Application.Common;
 using System.Security.Claims;
 
-namespace DoQuest.Api.Infrastructure;
+namespace Presentaiton.Infrastructure;
 
-public sealed class HttpContextCurrentUser(IHttpContextAccessor httpContextAccessor) : ICurrentUser
+internal sealed class HttpContextCurrentUser(IHttpContextAccessor httpContextAccessor) : ICurrentUser
 {
     public string FirebaseUid =>
         httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier)

@@ -1,24 +1,35 @@
-using System.Net;
-using System.Text.Json;
+namespace Presentation.Middleware;
 
-namespace DoQuest.Api.Middleware;
-
-public sealed class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger)
+internal class ExceptionHandler(RequestDelegate next, ILogger<ExceptionHandler> logger, IHostEnvironment env)
 {
+    private readonly RequestDelegate _next = next;
+    private readonly ILogger<ExceptionHandler> _logger = logger;
+    private readonly IHostEnvironment _env = env;
+
     public async Task InvokeAsync(HttpContext context)
     {
         try
         {
-            await next(context);
+            await _next(context);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Unhandled exception: {Message}", ex.Message);
-            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+            _logger.LogError(ex, "Ocorreu um erro inesperado");
             context.Response.ContentType = "application/json";
+            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
 
-            var response = new { error = "Ocorreu um erro interno. Tente novamente mais tarde." };
-            await context.Response.WriteAsync(JsonSerializer.Serialize(response));
+            var response = new
+            {
+                Message = "Ocorreu um erro interno no servidor. Tente novamente mais tarde.",
+                devMessage = _env.IsDevelopment() ? new
+                {
+                    exception = ex.GetType().Name,
+                    Message = ex.Message,
+                    stackTrace = ex.StackTrace,
+                    innerException = ex.InnerException?.Message
+                } : null
+            };
+            await context.Response.WriteAsJsonAsync(response.ToString());
         }
     }
 }
