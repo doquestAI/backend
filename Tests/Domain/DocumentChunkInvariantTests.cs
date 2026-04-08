@@ -4,7 +4,7 @@ using FluentAssertions;
 
 namespace Tests.Domain;
 
-internal sealed class DocumentChunkInvariantTests
+public sealed class DocumentChunkInvariantTests
 {
     private static readonly float[] ValidEmbedding =
         Enumerable.Repeat(0.1f, ModelConstants.EmbeddingDimension).ToArray();

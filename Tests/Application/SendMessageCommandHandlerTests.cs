@@ -9,7 +9,7 @@ using NSubstitute;
 
 namespace Tests.Application;
 
-internal sealed class SendMessageCommandHandlerTests
+public sealed class SendMessageCommandHandlerTests
 {
     private readonly IUserRepository _userRepo = Substitute.For<IUserRepository>();
     private readonly IDocumentRepository _docRepo = Substitute.For<IDocumentRepository>();

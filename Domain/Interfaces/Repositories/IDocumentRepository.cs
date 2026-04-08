@@ -1,4 +1,5 @@
 using Domain.Entities;
+using Domain.ValueObjects;
 
 namespace Domain.Interfaces.Repositories;
 
@@ -12,5 +13,13 @@ internal interface IDocumentRepository : IBaseRepository<Document>
         Guid? vestibularId,
         CancellationToken cancellationToken = default);
     Task<Document?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
+
+    Task<IReadOnlyList<SearchResult>> SearchAsync(
+       float[] queryVector,
+       int topK = 5,
+       float scoreThreshold = 0.7f,
+       CancellationToken ct = default);
+
+    Task UpsertAsync(Document document, CancellationToken ct = default);
 
 }

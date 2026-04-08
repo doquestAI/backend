@@ -1,7 +1,7 @@
-using Infrastructure.Configurations;
 using Domain.Interfaces.Services;
 using Google.Cloud.PubSub.V1;
 using Google.Protobuf;
+using Infrastructure.Configurations;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Text.Json;

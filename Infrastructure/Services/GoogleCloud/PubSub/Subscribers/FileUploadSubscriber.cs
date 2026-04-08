@@ -1,6 +1,6 @@
-using Infrastructure.Configurations;
-using Domain.Interfaces.Handlers;
+using Domain.Interfaces.Services.Cloud.Storage;
 using Domain.Messages;
+using Infrastructure.Configurations;
 using Infrastructure.Services.GoogleCloud.PubSub.Subscribers.Base;
 using Infrastructure.Services.GoogleCloud.PubSub.Subscribers.Factories;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,13 +16,13 @@ internal sealed class FileUploadSubscriber(
     ILogger<FileUploadSubscriber> logger)
     : SubscriberBase<
         StorageUploadMessage,
-        IStorageUploadHandler>(scopeFactory,
+        IStorageUploadService>(scopeFactory,
         factory.Create(
             options.Value.Subscriptions.FileUpload),
         logger)
 {
     protected override Task HandleAsync(
-        IStorageUploadHandler handler,
+        IStorageUploadService handler,
         StorageUploadMessage message,
         CancellationToken cancellationToken)
         => handler.ExecuteAsync(message, cancellationToken);

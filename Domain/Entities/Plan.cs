@@ -16,8 +16,8 @@ internal class Plan : Entity
 
     // Well-known seeded GUIDs (stable across environments)
     public static readonly Guid FreePlanId = new("a1b2c3d4-0001-0001-0001-000000000001");
-    public static readonly Guid ProPlanId  = new("a1b2c3d4-0002-0002-0002-000000000002");
-    public static readonly Guid MaxPlanId  = new("a1b2c3d4-0003-0003-0003-000000000003");
+    public static readonly Guid ProPlanId = new("a1b2c3d4-0002-0002-0002-000000000002");
+    public static readonly Guid MaxPlanId = new("a1b2c3d4-0003-0003-0003-000000000003");
 
     public static Plan Create(
         Guid id,

@@ -1,7 +1,7 @@
 
-using Infrastructure.Configurations;
-using Domain.Interfaces.Handlers;
+using Domain.Interfaces.Services.Email;
 using Domain.Messages;
+using Infrastructure.Configurations;
 using Infrastructure.Services.GoogleCloud.PubSub.Subscribers.Base;
 using Infrastructure.Services.GoogleCloud.PubSub.Subscribers.Factories;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,13 +17,13 @@ internal sealed class EmailSenderSubscriber(
     ILogger<EmailSenderSubscriber> logger)
     : SubscriberBase<
         NotificationEmailMessage,
-        IEmailNotificationHandler>(scopeFactory,
+        IEmailNotificationService>(scopeFactory,
         factory.Create(
             options.Value.Subscriptions.EmailNotification),
         logger)
 {
     protected override Task HandleAsync(
-        IEmailNotificationHandler handler,
+        IEmailNotificationService handler,
         NotificationEmailMessage message,
         CancellationToken cancellationToken)
         => handler.ExecuteAsync(message, cancellationToken);

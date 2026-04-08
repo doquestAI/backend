@@ -4,7 +4,7 @@ using FluentAssertions;
 
 namespace Tests.Domain;
 
-internal sealed class UserPlanLimitTests
+public sealed class UserPlanLimitTests
 {
     private static Plan CreateFreePlan() =>
         Plan.Create(

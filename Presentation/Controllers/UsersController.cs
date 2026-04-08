@@ -4,11 +4,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Common;
 using Swashbuckle.AspNetCore.Annotations;
-using RegisterCommand = Application.UseCases.Users.Commands.RegisterUser.RegisterUserCommand;
-using RegisterResponse = Application.UseCases.Users.Commands.RegisterUser.RegisterUserResponse;
 using ChangePlanCommand = Application.UseCases.Users.Commands.ChangePlan.ChangePlanCommand;
 using ChangePlanResponse = Application.UseCases.Users.Commands.ChangePlan.ChangePlanResponse;
 using GetProfileQuery = Application.UseCases.Users.Queries.GetUserProfile.GetUserProfileQuery;
+using RegisterCommand = Application.UseCases.Users.Commands.RegisterUser.RegisterUserCommand;
+using RegisterResponse = Application.UseCases.Users.Commands.RegisterUser.RegisterUserResponse;
 using UserProfileDto = Application.UseCases.Users.Queries.GetUserProfile.UserProfileDto;
 
 namespace Presentation.Controllers;

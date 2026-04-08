@@ -1,8 +1,8 @@
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections;
 using System.Reflection;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using JsonProperty = Newtonsoft.Json.Serialization.JsonProperty;
 
 namespace Presentation.Common.Converters;

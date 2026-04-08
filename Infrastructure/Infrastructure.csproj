@@ -1,20 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <ItemGroup>
-    <ProjectReference Include="..\Application\Application.csproj" />
-  </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Azure.AI.OpenAI" Version="2.9.0-beta.1" />
+    <PackageReference Include="Azure.Identity" Version="1.20.0" />
     <PackageReference Include="EFCore.NamingConventions" Version="10.0.1" />
     <PackageReference Include="FirebaseAdmin" Version="3.5.0" />
     <PackageReference Include="Google.Cloud.PubSub.V1" Version="3.33.0" />
     <PackageReference Include="Google.Cloud.Storage.V1" Version="4.14.0" />
     <PackageReference Include="Microsoft.Agents.AI" Version="1.0.0" />
+    <PackageReference Include="Microsoft.Agents.AI.OpenAI" Version="1.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.5" />
-    <PackageReference Include="Microsoft.Extensions.AI" Version="10.4.1" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.1" />
     <PackageReference Include="OllamaSharp" Version="5.4.25" />
     <PackageReference Include="Pgvector" Version="0.3.2" />
+    <PackageReference Include="Pgvector.EntityFrameworkCore" Version="0.3.0" />
     <PackageReference Include="Stripe.net" Version="51.0.0" />
     <PackageReference Include="EFCoreSecondLevelCacheInterceptor" Version="5.3.9" />
     <PackageReference Include="EFCoreSecondLevelCacheInterceptor.MemoryCache" Version="5.3.9" />
@@ -57,7 +57,11 @@
 
   <ItemGroup>
     <Folder Include="Cache\" />
-    <Folder Include="Options\" />
+    <Folder Include="Interfaces\" />
+    <Folder Include="Interfaces\AI\" />
+    <Folder Include="Interfaces\AI\Pipelines\" />
+    <Folder Include="Services\Auth\" />
+    <Folder Include="Services\Chunkers\" />
   </ItemGroup>
 
 

@@ -3,10 +3,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Common;
 using Swashbuckle.AspNetCore.Annotations;
+using DocumentSummaryDto = Application.UseCases.Documents.Queries.GetDocumentsByVestibular.DocumentSummaryDto;
+using GetByVestibularQuery = Application.UseCases.Documents.Queries.GetDocumentsByVestibular.GetDocumentsByVestibularQuery;
 using IngestCommand = Application.UseCases.Documents.Commands.IngestDocument.IngestDocumentCommand;
 using IngestResponse = Application.UseCases.Documents.Commands.IngestDocument.IngestDocumentResponse;
-using GetByVestibularQuery = Application.UseCases.Documents.Queries.GetDocumentsByVestibular.GetDocumentsByVestibularQuery;
-using DocumentSummaryDto = Application.UseCases.Documents.Queries.GetDocumentsByVestibular.DocumentSummaryDto;
 
 namespace Presentation.Controllers;
 
@@ -15,20 +15,13 @@ namespace Presentation.Controllers;
 [Authorize]
 internal sealed class DocumentsController(IMediator mediator) : InternalControllerBase
 {
-    internal sealed record IngestDocumentRequest(
-        string Title,
-        string SourceUrl,
-        Guid VestibularId,
-        string RawText);
 
     [HttpPost]
-    [SwaggerOperation(OperationId = "DocumentsIngest")]
+    [SwaggerOperation(OperationId = "DocumentUpload")]
     public async Task<IActionResult> Ingest(
-        [FromBody] IngestDocumentRequest request,
+        [FromBody] request,
         CancellationToken ct)
     {
-        var command = new IngestCommand(request.Title, request.SourceUrl, request.VestibularId, request.RawText);
-        var result = await mediator.Send(command, ct);
         return ToActionResult(result, StatusCodes.Status201Created);
     }
 

@@ -13,6 +13,8 @@ internal sealed class CoreDbContext(DbContextOptions<CoreDbContext> options) : D
     public DbSet<Document> Documents => Set<Document>();
     public DbSet<DocumentChunk> DocumentChunks => Set<DocumentChunk>();
     public DbSet<OllamaModel> OllamaModels => Set<OllamaModel>();
+    public DbSet<ChatSession> ChatSessions => Set<ChatSession>();
+    public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

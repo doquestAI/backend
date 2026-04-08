@@ -43,7 +43,8 @@ internal class Document : Entity
 
     public void AddChunk(string text, float[] embedding)
     {
-        if (!IsValid) return;
+        if (!IsValid)
+            return;
 
         var chunk = DocumentChunk.Create(Id, text, embedding, _chunks.Count);
 

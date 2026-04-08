@@ -1,6 +1,6 @@
-using Infrastructure.Configurations;
-using Domain.Interfaces.Handlers;
+using Domain.Interfaces.Services.AI.Embeddings;
 using Domain.Messages;
+using Infrastructure.Configurations;
 using Infrastructure.Services.GoogleCloud.PubSub.Subscribers.Base;
 using Infrastructure.Services.GoogleCloud.PubSub.Subscribers.Factories;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,13 +16,13 @@ internal sealed class EmbeddingCompletedSubscriber(
     ILogger<EmbeddingCompletedSubscriber> logger)
     : SubscriberBase<
         EmbeddingCompletedMessage,
-        IEmbeddingCompletedHandler>(scopeFactory,
+        IEmbeddingCompletedService>(scopeFactory,
         factory.Create(
             options.Value.Subscriptions.EmbeddingCompleted),
         logger)
 {
     protected override Task HandleAsync(
-        IEmbeddingCompletedHandler handler,
+        IEmbeddingCompletedService handler,
         EmbeddingCompletedMessage message,
         CancellationToken cancellationToken)
         => handler.ExecuteAsync(message, cancellationToken);

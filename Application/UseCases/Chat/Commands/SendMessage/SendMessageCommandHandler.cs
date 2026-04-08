@@ -1,14 +1,13 @@
 using Application.Common;
 using Domain.Interfaces.Repositories;
-using Domain.Interfaces.Services;
+using Domain.Interfaces.Services.AI;
 using MediatR;
 
 namespace Application.UseCases.Chat.Commands.SendMessage;
 
 internal sealed class SendMessageCommandHandler(
     IUserRepository userRepository,
-    IDocumentRepository documentRepository,
-    IEmbeddingService embeddingService,
+    IChatSessionRepository chatSessionRepository,
     IChatAgentService chatAgentService,
     IUnitOfWork unitOfWork)
     : IRequestHandler<SendMessageCommand, Result<SendMessageResponse>>
@@ -22,34 +21,26 @@ internal sealed class SendMessageCommandHandler(
         if (user is null)
             return Result.Failure<SendMessageResponse>("User", "Usuário não encontrado");
 
-        // 2. Enforce plan message limit (domain rule — no exception)
+        // 2. Enforce plan message limit
         user.ConsumeMessage();
         if (!user.IsValid)
             return Result.Failure<SendMessageResponse>(user.Notifications);
 
-        // 3. Generate query embedding
-        var queryEmbedding = await embeddingService.GenerateAsync(request.Message, cancellationToken);
+        // 3. Verify session belongs to user
+        var session = await chatSessionRepository.GetWithMessagesAsync(request.SessionId,
+             messageLimit: 0, cancellationToken);
 
-        // 4. Retrieve semantically relevant chunks from pgvector
-        var chunks = await documentRepository.SearchSimilarChunksAsync(
-            queryEmbedding,
-            topK: 5,
+        if (session is null || session.UserId != user.Id)
+            return Result.Failure<SendMessageResponse>("Session", "Sessão não encontrada");
+
+        // 4. Run RAG pipeline via chat agent service
+        var agentResponse = await chatAgentService.ProcessMessageAsync(
+            request.SessionId,
+            request.Message,
             request.VestibularId,
             cancellationToken);
 
-        // 5. Build RAG context string
-        var ragContext = chunks.Count > 0
-            ? string.Join("\n\n---\n\n", chunks.Select((c, i) => $"[Fonte {i + 1}] {c.Text.Value}"))
-            : string.Empty;
-
-        // 6. Call MAF chat agent with context
-        var reply = await chatAgentService.ChatAsync(
-            request.Message,
-            ragContext,
-            request.ConversationHistory,
-            cancellationToken);
-
-        // 7. Persist updated daily counter
+        // 5. Persist updated daily counter
         userRepository.Update(user);
         await unitOfWork.CommitAsync(cancellationToken);
 
@@ -57,6 +48,6 @@ internal sealed class SendMessageCommandHandler(
             ? int.MaxValue
             : Math.Max(0, user.Plan.DailyMessageLimit.Value - user.DailyMessageCount);
 
-        return Result.Success(new SendMessageResponse(reply, chunks.Count, remaining));
+        return Result.Success(new SendMessageResponse(agentResponse.Reply, agentResponse.SourceChunksUsed, remaining));
     }
 }

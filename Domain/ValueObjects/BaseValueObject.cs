@@ -1,5 +1,5 @@
-using System.ComponentModel.DataAnnotations.Schema;
 using Flunt.Notifications;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.ValueObjects;
 

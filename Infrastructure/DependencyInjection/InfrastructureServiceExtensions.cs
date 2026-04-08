@@ -1,25 +1,32 @@
 using Domain.Interfaces.Repositories;
+using Domain.Interfaces.Services;
+using Domain.Interfaces.Services.AI;
+using Domain.Interfaces.Services.AI.Embeddings;
+using Domain.Interfaces.Services.Chunkers;
+using Domain.Interfaces.Services.Cloud.Auth;
+using Domain.Interfaces.Services.Cloud.Storage;
+using Domain.Interfaces.Services.Email;
+using Domain.Interfaces.Services.Payment;
+using EFCoreSecondLevelCacheInterceptor;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 using Infrastructure.AI;
 using Infrastructure.Auth;
+using Infrastructure.Cache;
+using Infrastructure.Configurations;
 using Infrastructure.Options;
 using Infrastructure.Payments;
 using Infrastructure.Persistence;
 using Infrastructure.Persistence.Repositories;
-using FirebaseAdmin;
-using Google.Apis.Auth.OAuth2;
+using Infrastructure.Repositories;
+using Infrastructure.Services;
+using Infrastructure.Services.GoogleCloud.PubSub.Publishers;
+using Infrastructure.Services.GoogleCloud.PubSub.Subscribers;
+using Infrastructure.Services.GoogleCloud.PubSub.Subscribers.Factories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Infrastructure.Repositories;
-using Infrastructure.Configurations;
-using Domain.Interfaces.Services;
-using Infrastructure.Services.GoogleCloud.PubSub.Publishers;
-using Infrastructure.Services;
-using Infrastructure.Services.GoogleCloud.PubSub.Subscribers.Factories;
-using Infrastructure.Services.GoogleCloud.PubSub.Subscribers;
-using Infrastructure.Cache;
 using Microsoft.Extensions.Options;
-using EFCoreSecondLevelCacheInterceptor;
 
 namespace Infrastructure.DependencyInjection;
 
@@ -52,11 +59,12 @@ internal static class InfrastructureServiceExtensions
                 .AddScoped<IVestibularRepository, VestibularRepository>()
                 .AddScoped<IPlanRepository, PlanRepository>()
                 .AddScoped<IDocumentRepository, DocumentRepository>()
+                .AddScoped<IChatSessionRepository, ChatSessionRepository>()
                 .AddScoped<IEmbeddingService, OllamaEmbeddingService>()
                 .AddScoped<IChatAgentService, OllamaChatAgentService>()
-                .AddScoped<IFirebaseAuthService, FirebaseAuthService>()
-                .AddScoped<IStripeService, StripeService>()
-                .AddScoped<IDocumentChunker, FixedWindowDocumentChunker>();
+                .AddScoped<IAuthService, FirebaseAuthService>()
+                .AddScoped<IGatewayPaymentService, StripeService>()
+                .AddScoped<IDocumentChunkerService, FixedWindowDocumentChunkerService>();
             services.AddSingleton<SubscriberFactory>();
         }
 
@@ -102,7 +110,7 @@ internal static class InfrastructureServiceExtensions
         services.AddDbContext<CoreDbContext>(options =>
             options.UseNpgsql(connectionString, npgsqlOptions =>
             {
-                npgsqlOptions.UseVector();
+                //npgsqlOptions.UseVector();
                 npgsqlOptions.EnableRetryOnFailure(maxRetryCount: 3);
             })
             .UseSnakeCaseNamingConvention());

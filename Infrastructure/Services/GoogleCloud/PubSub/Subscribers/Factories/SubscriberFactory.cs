@@ -1,5 +1,5 @@
-using Infrastructure.Configurations;
 using Google.Cloud.PubSub.V1;
+using Infrastructure.Configurations;
 using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Services.GoogleCloud.PubSub.Subscribers.Factories;

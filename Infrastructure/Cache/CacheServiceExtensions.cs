@@ -1,5 +1,5 @@
-using Infrastructure.Configurations;
 using EFCoreSecondLevelCacheInterceptor;
+using Infrastructure.Configurations;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Infrastructure.Cache;

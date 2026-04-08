@@ -1,12 +1,13 @@
 using Domain.Interfaces.Services;
+using Domain.Interfaces.Services.Payment;
 using Infrastructure.Options;
 using Microsoft.Extensions.Options;
 using Stripe;
 using Stripe.Checkout;
 
-namespace Infrastructure.Payments;
+namespace Infrastructure.Services.Payments;
 
-internal sealed class StripeService : IStripeService
+internal sealed class StripeService : IGatewayPaymentService
 {
     private readonly StripeOptions _options;
 
