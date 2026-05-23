@@ -1,9 +1,0 @@
-{
-  "DatabaseSettings": {
-    "Host": "localhost",
-    "Port": 5432,
-    "Database": "Kdesk",
-    "Username": "postgres",
-    "Password": "your_password"
-  }
-}
