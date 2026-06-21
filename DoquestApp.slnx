@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="AI/AI.csproj" />
+  <Project Path="Application/Application.csproj" />
+  <Project Path="Domain/Domain.csproj" />
+  <Project Path="Infrastructure/Infrastructure.csproj" />
+  <Project Path="Presentation/Presentation.csproj" />
+  <Project Path="Test/Test.csproj" />
+</Solution>

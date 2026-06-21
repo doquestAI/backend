@@ -1,0 +1,139 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "AppSettings": {
+    "BackendUrl": "https://localhost:7069",
+    "FrontendUrl": "http://localhost:3000",
+    "VersionApi": "v1",
+    "PublicUrlFrontEnd": "http://localhost:3000",
+    "CorsPolicyName": "KdeskCorsPolicy"
+  },
+  "JwtSettings": {
+    "Key": "YOUR_JWT_SECRET_KEY_HERE_MINIMUM_32_CHARACTERS",
+    "Issuer": "Kdesk",
+    "Audience": "Kdesk.Api",
+    "AccessTokenExpirationMinutes": 15,
+    "RefreshTokenExpirationDays": 7
+  },
+  "SmtpSettings": {
+    "Server": "smtp.example.com",
+    "Port": 587,
+    "User": "your-username",
+    "Pass": "your-password"
+  },
+  "RabbitMqSettings": {
+    "User": "guest",
+    "Host": "localhost",
+    "Password": "guest"
+  },
+  "CacheSettings": {
+    "Provider": "Memory",
+    "DefaultExpirationMinutes": 30,
+    "Redis": {
+      "ConnectionString": "localhost:6379",
+      "InstanceName": "Kdesk_"
+    }
+  },
+  "HangfireSettings": {
+    "EnableDashboard": false,
+    "DashboardPath": "/hangfire",
+    "WorkerCount": 20,
+    "Schedules": {
+      "CleanupExpiredTokens": "0 2 * * *"
+    }
+  },
+  "AzyreSettings": {
+    "ProjectId": "",
+    "BucketDocuments": "",
+    "BucketMedia": "",
+    "SignedUrlDurationHoursDocuments": 1,
+    "SignedUrlDurationHoursMedia": 1
+  },
+  "PubSubSettings": {
+    "ProjectId": "",
+    "Topics": {
+      "FileUpload": "",
+      "FileDelete": "",
+      "EmailNotification": "",
+      "EmbeddingProcessing": "",
+      "EmbeddingDeletionRequest": "",
+      "StorageDelete": ""
+    },
+    "DatabaseSettings": {
+      "Host": "",
+      "Port": 5432,
+      "Database": "",
+      "Username": "",
+      "Password": ""
+    },
+    "Subscriptions": {
+      "FileUpload": "",
+      "FileDelete": "",
+      "EmailNotification": "",
+      "EmbeddingCompleted": "",
+      "EmbeddingDeletionCompleted": "",
+      "StorageDeleteCompleted": "",
+      "MaxConcurrentMessages": 10,
+      "AckDeadlineSeconds": 60
+    }
+  },
+  "SignedUrlSettings": {
+    "IntervalMinutes": 5,
+    "BatchSize": 100,
+    "UrlExpirationDays": 7
+  },
+  "ReverseProxy": {
+    "Routes": {
+      "rag-documents-route": {
+        "ClusterId": "rag-service",
+        "AuthorizationPolicy": "default",
+        "Match": {
+          "Path": "/api/rag/documents/{**catch-all}"
+        },
+        "Transforms": [
+          {
+            "PathRemovePrefix": "/api/rag"
+          }
+        ]
+      },
+      "rag-chat-route": {
+        "ClusterId": "rag-service",
+        "AuthorizationPolicy": "default",
+        "Match": {
+          "Path": "/api/rag/chat/{**catch-all}"
+        },
+        "Transforms": [
+          {
+            "PathRemovePrefix": "/api/rag"
+          }
+        ]
+      },
+      "rag-embeddings-route": {
+        "ClusterId": "rag-service",
+        "AuthorizationPolicy": "default",
+        "Match": {
+          "Path": "/api/rag/embeddings/{**catch-all}"
+        },
+        "Transforms": [
+          {
+            "PathRemovePrefix": "/api/rag"
+          }
+        ]
+      }
+    },
+    "Clusters": {
+      "rag-service": {
+        "Destinations": {
+          "destination1": {
+            "Address": "http://localhost:8000"
+          }
+        }
+      }
+    }
+  }
+}
