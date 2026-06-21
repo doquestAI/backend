@@ -14,11 +14,12 @@ public class HttpUserContext(IHttpContextAccessor httpContextAccessor) : IUserCo
     {
         get
         {
-            var userIdClaim = User.FindFirst("user_id")?.Value
-                ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            // Entra External ID uses the "oid" claim (object ID) mapped to NameIdentifier
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                ?? User.FindFirst("oid")?.Value;
 
-            return userIdClaim != null
-                ? Guid.Parse(userIdClaim)
+            return userIdClaim != null && Guid.TryParse(userIdClaim, out var guid)
+                ? guid
                 : throw new UnauthorizedAccessException("Usuário não autenticado");
         }
     }
@@ -27,8 +28,8 @@ public class HttpUserContext(IHttpContextAccessor httpContextAccessor) : IUserCo
     {
         get
         {
-            return User.FindFirst("role")?.Value
-                ?? User.FindFirst(ClaimTypes.Role)?.Value
+            return User.FindFirst(ClaimTypes.Role)?.Value
+                ?? User.FindFirst("roles")?.Value
                 ?? "User";
         }
     }

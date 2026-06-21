@@ -1,4 +1,3 @@
-using Application.Services.BackgroundJobs;
 using Application.UseCases.Commands.EmailNotification;
 using Application.UseCases.Commands.Storage;
 using Domain.Interfaces.Handlers;
@@ -20,6 +19,5 @@ internal static class ApplicationServicesExtensions
         services.AddScoped<IEmbeddingCompletedHandler, EmbeddingCompletedHandler>();
         services.AddScoped<IEmbeddingDeletionCompletedHandler, EmbeddingDeletionCompletedHandler>();
         services.AddScoped<IStorageUploadHandler, StorageUploadHandler>();
-        services.AddHostedService<TokenCleanupBackgroundService>();
     }
 }

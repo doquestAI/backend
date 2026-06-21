@@ -19,7 +19,7 @@ internal class Handler(
     ITemporaryStorageService temporaryStorageService,
     IMessagePublisher messagePublisher,
     IUserContext userContext,
-    IOptions<AzyreSettings> AzyreSettings,
+    IOptions<AzureSettings> AzureSettings,
     IOptions<PubSubSettings> pubSubSettings,
     IOptions<AppSettings> appSettings) : IRequestHandler<Request, Response>
 {
@@ -47,7 +47,7 @@ internal class Handler(
 
         var document = new DocumentEntity(
             fileName: fileName,
-            containerName: AzyreSettings.Value.BucketDocuments,
+            containerName: AzureSettings.Value.BucketDocuments,
             contentType: contentType.Value,
             fileSizeBytes: request.File.Length,
             uploadedByUserId: userContext.UserId,
@@ -70,7 +70,7 @@ internal class Handler(
 
         var uploadMessage = new StorageUploadMessage(
             DocumentId: document.Id,
-            ContainerName: AzyreSettings.Value.BucketDocuments,
+            ContainerName: AzureSettings.Value.BucketDocuments,
             ObjectPath: objectPath,
             ContentType: request.File.ContentType,
             LocalFilePath: localPath);

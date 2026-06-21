@@ -2,20 +2,18 @@ using Application.DI;
 using Domain.Configurations;
 using Domain.Interfaces.Context;
 using Infrastructure.DI;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
-using Microsoft.IdentityModel.Tokens;
+using Microsoft.Identity.Web;
 using Microsoft.OpenApi;
 using Newtonsoft.Json.Serialization;
 using Presentation.Adapters;
 using Presentation.Common.Converters;
 using Presentation.Common.Filters;
 using Presentation.Filters;
-using System.Text;
 using System.Text.Json.Serialization;
 
 namespace Presentation.Common.Api;
@@ -25,9 +23,10 @@ internal static class BuilderExtensions
     internal static void AddConfiguration(this WebApplicationBuilder builder)
     {
         builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
-        builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
         builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
         builder.Services.Configure<AzureSettings>(builder.Configuration.GetSection("AzyreSettings"));
+        builder.Services.Configure<AzureAdSettings>(builder.Configuration.GetSection("AzureAd"));
+        builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
         builder.Services.Configure<PubSubSettings>(builder.Configuration.GetSection("PubSubSettings"));
         builder.Services.Configure<DatabaseSettings>(builder.Configuration.GetSection("DatabaseSettings"));
         builder.Services.Configure<CacheSettings>(builder.Configuration.GetSection("CacheSettings"));
@@ -83,78 +82,18 @@ internal static class BuilderExtensions
         builder.Logging.AddDebug();
     }
 
-    internal static void AddJwtAuthentication(this WebApplicationBuilder builder)
+    internal static void AddEntraAuthentication(this WebApplicationBuilder builder)
     {
-        var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>()
-            ?? throw new InvalidOperationException("JwtSettings não configurado");
+        builder.Services.AddMicrosoftIdentityWebApiAuthentication(
+            builder.Configuration,
+            jwtBearerScheme: "Bearer",
+            configSectionName: "AzureAd");
 
-        var key = Encoding.ASCII.GetBytes(jwtSettings.Key);
-
-        builder.Services.AddAuthentication(options =>
+        builder.Services.AddAuthorization(options =>
         {
-            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-        })
-        .AddJwtBearer(options =>
-        {
-            options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
-            options.SaveToken = true;
-            options.TokenValidationParameters = new TokenValidationParameters
-            {
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(key),
-                ValidateIssuer = true,
-                ValidIssuer = jwtSettings.Issuer,
-                ValidateAudience = true,
-                ValidAudience = jwtSettings.Audience,
-                ValidateLifetime = true,
-                ClockSkew = TimeSpan.Zero,
-                RoleClaimType = System.Security.Claims.ClaimTypes.Role,
-                NameClaimType = "user_id"
-            };
-
-            options.Events = new JwtBearerEvents
-            {
-                OnAuthenticationFailed = context =>
-                {
-                    if (context.Exception is SecurityTokenExpiredException)
-                    {
-                        context.Response.Headers.Append("Token-Expired", "true");
-                    }
-                    return Task.CompletedTask;
-                },
-                OnChallenge = context =>
-                {
-                    context.HandleResponse();
-                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                    context.Response.ContentType = "application/json";
-                    var result = System.Text.Json.JsonSerializer.Serialize(new
-                    {
-                        statusCode = 401,
-                        message = "Não autorizado. Token inválido ou expirado."
-                    });
-                    return context.Response.WriteAsync(result);
-                },
-                OnForbidden = context =>
-                {
-                    context.Response.StatusCode = StatusCodes.Status403Forbidden;
-                    context.Response.ContentType = "application/json";
-
-                    var claims = context.Principal?.Claims.Select(c => new { c.Type, c.Value });
-                    Console.WriteLine($"403 Forbidden - Claims: {System.Text.Json.JsonSerializer.Serialize(claims)}");
-
-                    var result = System.Text.Json.JsonSerializer.Serialize(new
-                    {
-                        statusCode = 403,
-                        message = "Acesso negado. Você não tem permissão para acessar este recurso."
-                    });
-                    return context.Response.WriteAsync(result);
-                }
-            };
+            options.AddPolicy("AdminOnly", policy =>
+                policy.RequireRole("admin"));
         });
-
-        builder.Services.AddAuthorization();
     }
 
     internal static void AddRateLimiting(this WebApplicationBuilder builder)

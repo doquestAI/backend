@@ -19,9 +19,6 @@ public class ValueObjectsProfile : Profile
         CreateMap<CNPJ, string>()
             .ConvertUsing(src => src.Number ?? string.Empty);
 
-        CreateMap<Password, string>()
-            .ConvertUsing(src => src.Content ?? string.Empty);
-
         CreateMap<UniqueName, string>()
             .ConvertUsing(src => src.Name ?? string.Empty);
 

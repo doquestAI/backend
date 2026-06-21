@@ -1,3 +1,4 @@
+using Azure.Identity;
 using Domain.Configurations;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services;
@@ -12,6 +13,7 @@ using Infrastructure.Services.GoogleCloud.PubSub.Subscribers.Factories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Microsoft.Graph;
 
 namespace Infrastructure.DI;
 
@@ -39,13 +41,18 @@ internal static class InfrastructureServicesExtensions
                 .AddScoped<IMessagePublisher, PubSubMessagePublisher>()
                 .AddScoped<ITemporaryStorageService, TemporaryStorageService>()
                 .AddScoped<IEmailService, EmailService>()
-                .AddScoped<ITokenService, TokenService>()
                 .AddScoped<ICloudStorageService, GoogleCloudStorageService>()
-                .AddScoped<IUserRepository, UserRepository>()
-                .AddScoped<IRefreshTokenRepository, RefreshTokenRepository>()
                 .AddScoped<IPictureRepository, PictureRepository>()
-                .AddScoped<IRoleRepository, RoleRepository>()
-                .AddScoped<IDocumentRepository, DocumentRepository>();
+                .AddScoped<IDocumentRepository, DocumentRepository>()
+                .AddScoped<IAccountSubscriptionRepository, AccountSubscriptionRepository>()
+                .AddScoped<IIdentityProviderService, EntraIdentityProviderService>()
+                .AddScoped<IStripeWebhookService, StripeWebhookService>();
+            services.AddSingleton<GraphServiceClient>(provider =>
+            {
+                var settings = provider.GetRequiredService<IOptions<AzureAdSettings>>().Value;
+                var credential = new ClientSecretCredential(settings.TenantId, settings.ClientId, settings.ClientSecret);
+                return new GraphServiceClient(credential);
+            });
             services.AddSingleton<SubscriberFactory>();
         }
 

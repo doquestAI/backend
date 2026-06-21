@@ -10,7 +10,7 @@ internal sealed class GoogleCloudStorageService : ICloudStorageService
 {
     private readonly StorageClient _storageClient;
 
-    public GoogleCloudStorageService(IOptions<AzyreSettings> settings)
+    public GoogleCloudStorageService(IOptions<AzureSettings> settings)
     {
         var settings1 = settings.Value;
 

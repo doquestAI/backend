@@ -13,8 +13,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Prompts\*.md" />
+    <EmbeddedResource Include="Prompts\*.yml" />
     <ProjectReference Include="..\Domain\Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Agents.AI" Version="1.10.0" />
+    <PackageReference Include="Microsoft.Extensions.AI.Abstractions" Version="10.7.0" />
   </ItemGroup>
 
 </Project>

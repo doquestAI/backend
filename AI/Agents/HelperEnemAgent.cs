@@ -9,10 +9,7 @@ internal class HelperEnemAgent(
 )
     : IAgent<string, string>
 {
-    private const string AgentName = "HelperEnemAgent";
-    private const string PromptTemplate = "You are a helpful assistant for the ENEM exam. Your task is to help the user understand and solve questions related to the ENEM exam.";
-
-
+    private PromptTemplate Template { get; set; }
     public async Task<string> RunAsync(string data, CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();

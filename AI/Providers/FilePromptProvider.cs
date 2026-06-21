@@ -9,7 +9,7 @@ internal class FilePromptProvider
     {
         var assembly = typeof(FilePromptProvider).Assembly;
 
-        var resourceName = $"AI.Prompts.{agentName}.md";
+        var resourceName = $"AI.Prompts.{agentName}.yml";
         await using var stream = assembly.GetManifestResourceStream(resourceName) ?? throw new FileNotFoundException("Prompt not found", agentName);
 
         using var reader = new StreamReader(stream);

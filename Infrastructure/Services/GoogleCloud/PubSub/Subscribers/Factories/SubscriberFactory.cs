@@ -4,9 +4,9 @@ using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Services.GoogleCloud.PubSub.Subscribers.Factories;
 
-internal sealed class SubscriberFactory(IOptions<AzyreSettings> options)
+internal sealed class SubscriberFactory(IOptions<AzureSettings> options)
 {
-    private readonly AzyreSettings _settings = options.Value;
+    private readonly AzureSettings _settings = options.Value;
 
     public SubscriberClient Create(string subscriptionId)
     {

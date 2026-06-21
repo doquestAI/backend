@@ -1,3 +1,6 @@
 namespace Domain.Interfaces.Agents;
 
-internal class IHelperEnemAgent;
+internal interface IAgent<in TData, TResponse>
+{
+    Task<TResponse> RunAsync(TData data, CancellationToken cancellationToken = default);
+}

@@ -42,7 +42,7 @@ var appSettings = builder.Configuration.GetSection("AppSettings").Get<AppSetting
     ?? throw new InvalidOperationException("AppSettings not configured");
 
 builder.AddCrossOrigin(appSettings);
-builder.AddJwtAuthentication();
+builder.AddEntraAuthentication();
 builder.Services.AddDataContexts();
 builder.AddServices();
 
@@ -66,7 +66,6 @@ app.UseMiddleware<ExceptionHandler>();
 app.UseCors(appSettings.CorsPolicyName);
 app.UseAuthentication();
 app.UseAuthorization();
-app.MapReverseProxy();
 app.MapControllers();
 
 await app.RunAsync();
