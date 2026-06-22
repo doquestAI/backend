@@ -1,6 +1,13 @@
+using Domain.ValueObjects;
+
 namespace AI.Providers.Abstractions;
 
-internal interface IPromptProvider
+/// <summary>
+/// Carrega templates de prompt de diversas fontes (arquivo, banco, remoto).
+/// Registrado com Keyed DI pelo enum PromptProvider.
+/// </summary>
+public interface IPromptProvider
 {
-    Task<string> GetPromptAsync(string promptName, CancellationToken cancellationToken = default);
+    Task<PromptTemplate> GetAsync(string key, CancellationToken ct = default);
+    Task<bool> ExistsAsync(string key, CancellationToken ct = default);
 }
