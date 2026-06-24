@@ -11,7 +11,7 @@
     "FrontendUrl": "http://localhost:3000",
     "VersionApi": "v1",
     "PublicUrlFrontEnd": "http://localhost:3000",
-    "CorsPolicyName": "KdeskCorsPolicy"
+    "CorsPolicyName": "DoQuestCorsPolicy"
   },
   "JwtSettings": {
     "Key": "YOUR_JWT_SECRET_KEY_HERE_MINIMUM_32_CHARACTERS",

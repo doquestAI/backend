@@ -14,7 +14,7 @@ internal sealed partial class StorageUploadHandler(
     IDbCommit dbCommit,
     ICloudStorageService cloudStorageService,
     IMessagePublisher messagePublisher,
-    IOptions<PubSubSettings> pubSubSettings,
+    IOptions<ServiceBusSettings> pubSubSettings,
     ILogger<StorageUploadHandler> logger) : IStorageUploadHandler
 {
     public async Task ExecuteAsync(StorageUploadMessage message, CancellationToken cancellationToken)
@@ -71,7 +71,7 @@ internal sealed partial class StorageUploadHandler(
                 UploadedByUserId: document.UploadedByUserId);
 
             await messagePublisher.PublishAsync(
-                pubSubSettings.Value.Topics.EmbeddingProcessing,
+                pubSubSettings.Value.Queues.EmbeddingProcessing,
                 embeddingMessage,
                 cancellationToken);
 

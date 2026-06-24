@@ -1,4 +1,5 @@
 using Azure.Identity;
+using Azure.Messaging.ServiceBus;
 using Domain.Configurations;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services;
@@ -7,9 +8,10 @@ using Infrastructure.Cache;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
 using Infrastructure.Services;
-using Infrastructure.Services.GoogleCloud.PubSub.Publishers;
-using Infrastructure.Services.GoogleCloud.PubSub.Subscribers;
-using Infrastructure.Services.GoogleCloud.PubSub.Subscribers.Factories;
+using Infrastructure.Services.Azure.BlobStorage;
+using Infrastructure.Services.Azure.ServiceBus.Publishers;
+using Infrastructure.Services.Azure.ServiceBus.Subscribers;
+using Infrastructure.Services.Azure.ServiceBus.Subscribers.Factories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -38,25 +40,33 @@ internal static class InfrastructureServicesExtensions
         {
             services.AddMemoryCache();
             services.AddScoped<IDbCommit, DbCommit>()
-                .AddScoped<IMessagePublisher, PubSubMessagePublisher>()
+                .AddScoped<IMessagePublisher, ServiceBusMessagePublisher>()
                 .AddScoped<ITemporaryStorageService, TemporaryStorageService>()
                 .AddScoped<IEmailService, EmailService>()
-                .AddScoped<ICloudStorageService, GoogleCloudStorageService>()
+                .AddScoped<ICloudStorageService, AzureBlobStorageService>()
                 .AddScoped<IPictureRepository, PictureRepository>()
                 .AddScoped<IDocumentRepository, DocumentRepository>()
                 .AddScoped<IAccountSubscriptionRepository, AccountSubscriptionRepository>()
                 .AddScoped<IIdentityProviderService, EntraIdentityProviderService>()
                 .AddScoped<IStripeWebhookService, StripeWebhookService>();
+
             services.AddSingleton<GraphServiceClient>(provider =>
             {
                 var settings = provider.GetRequiredService<IOptions<AzureAdSettings>>().Value;
                 var credential = new ClientSecretCredential(settings.TenantId, settings.ClientId, settings.ClientSecret);
                 return new GraphServiceClient(credential);
             });
-            services.AddSingleton<SubscriberFactory>();
+
+            services.AddSingleton<ServiceBusClient>(provider =>
+            {
+                var settings = provider.GetRequiredService<IOptions<ServiceBusSettings>>().Value;
+                return new ServiceBusClient(settings.ConnectionString);
+            });
+
+            services.AddSingleton<ServiceBusProcessorFactory>();
         }
 
-        internal IServiceCollection AddPubSubSubscribers()
+        internal IServiceCollection AddServiceBusSubscribers()
         {
             services.AddHostedService<FileUploadSubscriber>();
             services.AddHostedService<EmbeddingCompletedSubscriber>();
@@ -67,7 +77,7 @@ internal static class InfrastructureServicesExtensions
 
         internal IServiceCollection AddAllBackgroundServices()
         {
-            services.AddPubSubSubscribers();
+            services.AddServiceBusSubscribers();
             return services;
         }
         internal void AddCacheServices(CacheSettings cacheSettings)

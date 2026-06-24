@@ -20,7 +20,7 @@ internal class Handler(
     IMessagePublisher messagePublisher,
     IUserContext userContext,
     IOptions<AzureSettings> AzureSettings,
-    IOptions<PubSubSettings> pubSubSettings,
+    IOptions<ServiceBusSettings> pubSubSettings,
     IOptions<AppSettings> appSettings) : IRequestHandler<Request, Response>
 {
     public async Task<Response> Handle(Request request, CancellationToken cancellationToken)
@@ -47,7 +47,7 @@ internal class Handler(
 
         var document = new DocumentEntity(
             fileName: fileName,
-            containerName: AzureSettings.Value.BucketDocuments,
+            containerName: AzureSettings.Value.ContainerDocuments,
             contentType: contentType.Value,
             fileSizeBytes: request.File.Length,
             uploadedByUserId: userContext.UserId,
@@ -70,13 +70,13 @@ internal class Handler(
 
         var uploadMessage = new StorageUploadMessage(
             DocumentId: document.Id,
-            ContainerName: AzureSettings.Value.BucketDocuments,
+            ContainerName: AzureSettings.Value.ContainerDocuments,
             ObjectPath: objectPath,
             ContentType: request.File.ContentType,
             LocalFilePath: localPath);
 
         await messagePublisher.PublishAsync(
-            pubSubSettings.Value.Topics.FileUpload,
+            pubSubSettings.Value.Queues.FileUpload,
             uploadMessage,
             cancellationToken);
 

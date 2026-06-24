@@ -1,24 +1,22 @@
 using Domain.Configurations;
 using Domain.Interfaces.Handlers;
 using Domain.Messages;
-using Infrastructure.Services.GoogleCloud.PubSub.Subscribers.Base;
-using Infrastructure.Services.GoogleCloud.PubSub.Subscribers.Factories;
+using Infrastructure.Services.Azure.ServiceBus.Subscribers.Base;
+using Infrastructure.Services.Azure.ServiceBus.Subscribers.Factories;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Infrastructure.Services.GoogleCloud.PubSub.Subscribers;
+namespace Infrastructure.Services.Azure.ServiceBus.Subscribers;
 
 internal sealed class EmbeddingCompletedSubscriber(
     IServiceScopeFactory scopeFactory,
-    SubscriberFactory factory,
-    IOptions<PubSubSettings> options,
+    ServiceBusProcessorFactory factory,
+    IOptions<ServiceBusSettings> options,
     ILogger<EmbeddingCompletedSubscriber> logger)
-    : SubscriberBase<
-        EmbeddingCompletedMessage,
-        IEmbeddingCompletedHandler>(scopeFactory,
-        factory.Create(
-            options.Value.Subscriptions.EmbeddingCompleted),
+    : ServiceBusSubscriberBase<EmbeddingCompletedMessage, IEmbeddingCompletedHandler>(
+        scopeFactory,
+        factory.Create(options.Value.Queues.EmbeddingCompleted),
         logger)
 {
     protected override Task HandleAsync(

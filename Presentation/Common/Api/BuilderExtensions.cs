@@ -24,10 +24,10 @@ internal static class BuilderExtensions
     {
         builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
         builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
-        builder.Services.Configure<AzureSettings>(builder.Configuration.GetSection("AzyreSettings"));
+        builder.Services.Configure<AzureSettings>(builder.Configuration.GetSection("AzureStorageSettings"));
         builder.Services.Configure<AzureAdSettings>(builder.Configuration.GetSection("AzureAd"));
         builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
-        builder.Services.Configure<PubSubSettings>(builder.Configuration.GetSection("PubSubSettings"));
+        builder.Services.Configure<ServiceBusSettings>(builder.Configuration.GetSection("ServiceBusSettings"));
         builder.Services.Configure<DatabaseSettings>(builder.Configuration.GetSection("DatabaseSettings"));
         builder.Services.Configure<CacheSettings>(builder.Configuration.GetSection("CacheSettings"));
         builder.Services.Configure<SignedUrlSettings>(builder.Configuration.GetSection("SignedUrlSettings"));

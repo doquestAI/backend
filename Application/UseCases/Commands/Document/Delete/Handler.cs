@@ -15,7 +15,7 @@ internal sealed class Handler(
     IMessagePublisher messagePublisher,
     IDbCommit dbCommit,
     IUserContext userContext,
-    IOptions<PubSubSettings> pubSubSettings,
+    IOptions<ServiceBusSettings> pubSubSettings,
     ILogger<Handler> logger) : IRequestHandler<Request, Response>
 {
     public async Task<Response> Handle(Request request, CancellationToken cancellationToken)
@@ -54,14 +54,14 @@ internal sealed class Handler(
                     cancellationToken);
 
                 logger.LogInformation(
-                    "Deleted file from GCS for document {DocumentId}: {Path}",
+                    "Deleted file from blob storage for document {DocumentId}: {Path}",
                     request.DocumentId,
                     document.CloudStorageKey.Body);
             }
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error deleting file from GCS for document {DocumentId}", request.DocumentId);
+            logger.LogError(ex, "Error deleting file from blob storage for document {DocumentId}", request.DocumentId);
         }
 
         document.RequestDeletion(userContext.UserId);
@@ -75,7 +75,7 @@ internal sealed class Handler(
                 RequestedBy: userContext.UserId);
 
             await messagePublisher.PublishAsync(
-                pubSubSettings.Value.Topics.EmbeddingDeletionRequest,
+                pubSubSettings.Value.Queues.EmbeddingDeletionRequest,
                 deletionMessage,
                 cancellationToken);
 

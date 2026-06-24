@@ -7,6 +7,6 @@ public sealed class AppSettings
     public string VersionApi { get; set; } = string.Empty;
     public string EncryptionKey { get; set; } = string.Empty;
     public string PublicUrlFrontEnd { get; set; } = string.Empty;
-    public string CorsPolicyName { get; set; } = "KdeskCorsPolicy";
+    public string CorsPolicyName { get; set; } = "DoQuestCorsPolicy";
     public string TempFilesPath { get; set; } = Path.Combine(Path.GetTempPath(), "documents_students");
 }
