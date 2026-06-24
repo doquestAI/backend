@@ -12,17 +12,18 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- MAF abstractions: IChatClient, IEmbeddingGenerator, ChatMessage, Embedding<T> -->
+    <!-- Microsoft Agent Framework (MAF) — successor of Semantic Kernel + AutoGen, GA Apr/2026 -->
+    <PackageReference Include="Microsoft.Agents.AI" Version="1.11.0" />
+    <PackageReference Include="Microsoft.Agents.AI.Abstractions" Version="1.11.0" />
+
+    <!-- Microsoft.Extensions.AI — abstractions transitively used by MAF (IChatClient, IEmbeddingGenerator) -->
     <PackageReference Include="Microsoft.Extensions.AI.Abstractions" Version="10.7.0" />
-    <!-- MAF pipeline: .UseLogging(), .UseDistributedCache(), .UseFunctionInvocation() -->
     <PackageReference Include="Microsoft.Extensions.AI" Version="10.7.0" />
-    <!-- IDistributedCache, DistributedCacheEntryOptions -->
+
+    <!-- Plumbing -->
     <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="10.0.9" />
-    <!-- IServiceCollection, ActivatorUtilities, AddKeyedSingleton -->
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.9" />
-    <!-- IOptions<T>, IOptionsSnapshot<T>, Options.Create() -->
     <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.9" />
-    <!-- ILogger<T> -->
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.9" />
   </ItemGroup>
 

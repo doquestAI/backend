@@ -1,3 +1,5 @@
+using Application.Pipelines.Enem;
+using Application.Pipelines.Enem.Abstractions;
 using Application.UseCases.Commands.EmailNotification;
 using Application.UseCases.Commands.Storage;
 using Domain.Interfaces.Handlers;
@@ -19,5 +21,11 @@ internal static class ApplicationServicesExtensions
         services.AddScoped<IEmbeddingCompletedHandler, EmbeddingCompletedHandler>();
         services.AddScoped<IEmbeddingDeletionCompletedHandler, EmbeddingDeletionCompletedHandler>();
         services.AddScoped<IStorageUploadHandler, StorageUploadHandler>();
+
+        // ── Pipelines ENEM (chain de agentes MAF) ───────────────────────────
+        services.AddScoped<IGenerateQuestionPipeline, GenerateQuestionPipeline>();
+        services.AddScoped<IExplainTopicPipeline, ExplainTopicPipeline>();
+        services.AddScoped<IGradeAnswerPipeline, GradeAnswerPipeline>();
+        services.AddScoped<IAskHelperPipeline, AskHelperPipeline>();
     }
 }

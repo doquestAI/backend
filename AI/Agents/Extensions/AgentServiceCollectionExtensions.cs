@@ -1,162 +1,176 @@
 using AI.Agents.Enem;
 using AI.Providers;
 using AI.Providers.Abstractions;
-using AI.Providers.Memory;
+using AI.Providers.Context;
 using AI.Providers.Session;
+using Domain.Agents.Enem;
 using Domain.Enums;
 using Domain.Interfaces.Agents;
-using Domain.ValueObjects;
+using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace AI.Agents.Extensions;
 
+/// <summary>
+/// Registro de DI dos agentes usando Microsoft Agent Framework (MAF) 1.x.
+///
+/// Cada agente concreto é registrado em duas camadas:
+///   1. <see cref="AIAgent"/> (keyed por <see cref="AgentKeys"/>) — instância nativa do MAF
+///      configurada com Instructions, ChatOptions, AIContextProviders e wrap de OpenTelemetryAgent.
+///   2. Wrapper de domínio (<see cref="HelperEnemAgent"/>, etc.) — expõe
+///      <see cref="IAgent{TIn,TOut}"/> tipado para a camada de aplicação.
+/// </summary>
 public static class AgentServiceCollectionExtensions
 {
-    /// <summary>
-    /// Registra toda a infraestrutura de agentes:
-    ///   - Pipeline MAF com logging, cache distribuído e function invocation
-    ///   - IVectorStore (plugue sua implementação: Qdrant, AI Search, etc.)
-    ///   - IPromptProvider keyed por tipo (File, Database, Remote)
-    ///   - IAgentSession e IAgentMemory com IDistributedCache
-    ///   - AgentOptions por agente via named options
-    ///   - Todos os agentes concretos como internal (acessados via IAgent<,>)
-    /// </summary>
     public static IServiceCollection AddAgents(
         this IServiceCollection services,
-        Action<AgentInfraOptions>? configure = null)
+        Action<AgentInfraOptions> configure)
     {
-        var infraOptions = new AgentInfraOptions();
-        configure?.Invoke(infraOptions);
+        var infra = new AgentInfraOptions();
+        configure(infra);
 
-        // ── IChatClient — pipeline MAF ───────────────────────────────────────
-        if (infraOptions.ChatClientBuilder is not null)
+        // ── Pipeline IChatClient (MEAI middleware) ──────────────────────────
+        if (infra.ChatClientBuilder is not null)
         {
             services
-                .AddChatClient(infraOptions.ChatClientBuilder)
+                .AddChatClient(infra.ChatClientBuilder)
                 .UseLogging()
                 .UseDistributedCache()
-                .UseFunctionInvocation()
-                .Build();
+                .UseFunctionInvocation();
         }
 
-        // ── IEmbeddingGenerator — para RAG ───────────────────────────────────
-        if (infraOptions.EmbeddingGeneratorBuilder is not null)
+        // ── Pipeline IEmbeddingGenerator ────────────────────────────────────
+        if (infra.EmbeddingGeneratorBuilder is not null)
         {
             services
-                .AddEmbeddingGenerator(infraOptions.EmbeddingGeneratorBuilder)
-                .UseLogging()
-                .Build();
+                .AddEmbeddingGenerator(infra.EmbeddingGeneratorBuilder)
+                .UseLogging();
         }
 
-        // ── IVectorStore — plugue sua implementação ──────────────────────────
-        if (infraOptions.VectorStoreFactory is not null)
-            services.AddSingleton<IVectorStore>(infraOptions.VectorStoreFactory);
+        // ── IVectorStore (Qdrant, Azure AI Search, etc.) ────────────────────
+        if (infra.VectorStoreFactory is not null)
+            services.AddSingleton(infra.VectorStoreFactory);
 
-        // ── IPromptProvider keyed por fonte ──────────────────────────────────
+        // ── Prompt provider keyed (File por padrão) ─────────────────────────
         services.AddKeyedSingleton<IPromptProvider, FilePromptProvider>(PromptProvider.File);
 
-        // ── Session (scoped — uma por request/conversação) ───────────────────
-        // UserId e SessionId podem ser sobrescritos na camada Presentation via
-        // factory customizada que leia IHttpContextAccessor.
-        services.AddScoped<IAgentSession>(sp =>
-            new DistributedCacheAgentSession(
-                sp.GetRequiredService<IDistributedCache>(),
-                sp.GetRequiredService<ILogger<DistributedCacheAgentSession>>(),
-                sessionId: Guid.NewGuid().ToString("N"),
-                userId: "anonymous",
-                agentKey: "default"));
+        // ── Session cache compartilhado entre todos os agentes ──────────────
+        services.AddSingleton<AgentSessionCache>();
 
-        // ── Memory (singleton — persiste entre sessões) ──────────────────────
-        services.AddSingleton<IAgentMemory, DistributedCacheAgentMemory>();
+        // ── Registra um AIAgent por nome usando AddKeyedSingleton ───────────
+        RegisterEnemAgent(services, AgentKeys.Helper,
+            ragCollection: "enem-knowledge", temperature: 0.7f, maxTokens: 1024, enableMemory: true);
 
-        // ── AgentOptions por agente (named options) ──────────────────────────
-        services.AddOptions<AgentOptions>("enem-helper")
-            .Configure(o =>
-            {
-                o.ModelId = infraOptions.DefaultModelId;
-                o.Temperature = 0.7f;
-                o.MaxTokens = 1024;
-                o.MaxHistory = 10;
-                o.EnableRag = true;
-                o.EnableMemory = true;
-                o.SystemPromptKey = "enem-helper";
-            });
+        RegisterEnemAgent(services, AgentKeys.Explainer,
+            ragCollection: "enem-knowledge", temperature: 0.4f, maxTokens: 2048, enableMemory: false);
 
-        services.AddOptions<AgentOptions>("enem-explainer")
-            .Configure(o =>
-            {
-                o.ModelId = infraOptions.DefaultModelId;
-                o.Temperature = 0.4f;
-                o.MaxTokens = 2048;
-                o.EnableRag = true;
-                o.SystemPromptKey = "enem-explainer";
-            });
+        RegisterEnemAgent(services, AgentKeys.QuestionGenerator,
+            ragCollection: "enem-knowledge", temperature: 0.9f, maxTokens: 1500, enableMemory: false);
 
-        services.AddOptions<AgentOptions>("enem-question-generator")
-            .Configure(o =>
-            {
-                o.ModelId = infraOptions.DefaultModelId;
-                o.Temperature = 0.9f;
-                o.MaxTokens = 1500;
-                o.EnableRag = true;
-                o.SystemPromptKey = "enem-question-generator";
-            });
+        RegisterEnemAgent(services, AgentKeys.Feedback,
+            ragCollection: null, temperature: 0.2f, maxTokens: 512, enableMemory: true);
 
-        services.AddOptions<AgentOptions>("enem-feedback")
-            .Configure(o =>
-            {
-                o.ModelId = infraOptions.DefaultModelId;
-                o.Temperature = 0.2f;
-                o.MaxTokens = 512;
-                o.EnableMemory = true;
-                o.SystemPromptKey = "enem-feedback";
-            });
+        // ── Wrappers de domínio expostos via IAgent<TIn,TOut> ───────────────
+        services.AddScoped<HelperEnemAgent>();
+        services.AddScoped<ExplainerAgent>();
+        services.AddScoped<QuestionAgent>();
+        services.AddScoped<FeedbackAgent>();
 
-        // ── Agentes concretos (transient — criados por request) ──────────────
-        services.AddTransient<HelperEnemAgent>(sp => sp.ResolveAgent<HelperEnemAgent>("enem-helper"));
-        services.AddTransient<ExplainerAgent>(sp => sp.ResolveAgent<ExplainerAgent>("enem-explainer"));
-        services.AddTransient<QuestionAgent>(sp => sp.ResolveAgent<QuestionAgent>("enem-question-generator"));
-        services.AddTransient<FeedbackAgent>(sp => sp.ResolveAgent<FeedbackAgent>("enem-feedback"));
+        services.AddScoped<IAgent<string, string>>(sp => sp.GetRequiredService<HelperEnemAgent>());
+        services.AddScoped<IStreamingAgent<string>>(sp => sp.GetRequiredService<HelperEnemAgent>());
 
-        // Exposição via interface para consumo externo
-        services.AddTransient<IAgent<string, string>>(
-            sp => sp.GetRequiredService<HelperEnemAgent>());
+        services.AddScoped<IAgent<ExplainRequest, string>>(sp => sp.GetRequiredService<ExplainerAgent>());
+        services.AddScoped<IStreamingAgent<ExplainRequest>>(sp => sp.GetRequiredService<ExplainerAgent>());
 
-        services.AddTransient<IAgent<ExplainRequest, string>>(
-            sp => sp.GetRequiredService<ExplainerAgent>());
-
-        services.AddTransient<IAgent<QuestionRequest, EnemQuestion>>(
-            sp => sp.GetRequiredService<QuestionAgent>());
-
-        services.AddTransient<IAgent<FeedbackRequest, FeedbackResult>>(
-            sp => sp.GetRequiredService<FeedbackAgent>());
+        services.AddScoped<IAgent<QuestionRequest, EnemQuestion>>(sp => sp.GetRequiredService<QuestionAgent>());
+        services.AddScoped<IAgent<FeedbackRequest, FeedbackResult>>(sp => sp.GetRequiredService<FeedbackAgent>());
 
         return services;
     }
 
-    private static T ResolveAgent<T>(this IServiceProvider sp, string optionsName)
+    private static void RegisterEnemAgent(
+        IServiceCollection services,
+        string key,
+        string? ragCollection,
+        float temperature,
+        int maxTokens,
+        bool enableMemory)
     {
-        var namedOptions = sp.GetRequiredService<IOptionsSnapshot<AgentOptions>>()
-                             .Get(optionsName);
+        services.AddKeyedSingleton<AIAgent>(key, (sp, _) =>
+        {
+            var chatClient = sp.GetRequiredService<IChatClient>();
+            var loggerFactory = sp.GetRequiredService<ILoggerFactory>();
+            var promptProvider = sp.GetRequiredKeyedService<IPromptProvider>(PromptProvider.File);
 
-        return ActivatorUtilities.CreateInstance<T>(sp, Options.Create(namedOptions));
+            var instructions = LoadInstructions(promptProvider, key);
+            var contextProviders = BuildContextProviders(sp, key, ragCollection, enableMemory);
+
+            var options = new ChatClientAgentOptions
+            {
+                Name = key,
+                ChatOptions = new ChatOptions
+                {
+                    Instructions = instructions,
+                    Temperature = temperature,
+                    MaxOutputTokens = maxTokens,
+                },
+                AIContextProviders = contextProviders,
+            };
+
+            AIAgent agent = new ChatClientAgent(chatClient, options, loggerFactory);
+
+            // Decora com OpenTelemetryAgent: emite traces GenAI Semantic Conventions automaticamente.
+            return new OpenTelemetryAgent(agent, sourceName: $"DoQuest.AI.{key}");
+        });
+    }
+
+    private static List<AIContextProvider> BuildContextProviders(
+        IServiceProvider sp,
+        string agentKey,
+        string? ragCollection,
+        bool enableMemory)
+    {
+        var providers = new List<AIContextProvider>();
+
+        if (ragCollection is not null)
+        {
+            providers.Add(new RagContextProvider(
+                sp.GetRequiredService<IEmbeddingGenerator<string, Embedding<float>>>(),
+                sp.GetRequiredService<IVectorStore>(),
+                ragCollection,
+                sp.GetRequiredService<ILogger<RagContextProvider>>()));
+        }
+
+        if (enableMemory)
+        {
+            providers.Add(new DistributedCacheMemoryProvider(
+                sp.GetRequiredService<IDistributedCache>(),
+                memoryNamespace: agentKey,
+                sp.GetRequiredService<ILogger<DistributedCacheMemoryProvider>>()));
+        }
+
+        return providers;
+    }
+
+    private static string LoadInstructions(IPromptProvider provider, string key)
+    {
+        if (!provider.ExistsAsync(key).GetAwaiter().GetResult())
+            return string.Empty;
+
+        var template = provider.GetAsync(key).GetAwaiter().GetResult();
+        return template.Render(new Dictionary<string, string>
+        {
+            ["date_utc"] = DateTimeOffset.UtcNow.ToString("yyyy-MM-dd"),
+        });
     }
 }
 
 public sealed class AgentInfraOptions
 {
-    public string DefaultModelId { get; set; } = "gpt-4o-mini";
-
-    /// <summary>Configure o IChatClient (OpenAI, AzureOpenAI, Ollama, etc.).</summary>
     public IChatClient? ChatClientBuilder { get; set; }
-
-    /// <summary>Configure o IEmbeddingGenerator para RAG.</summary>
     public IEmbeddingGenerator<string, Embedding<float>>? EmbeddingGeneratorBuilder { get; set; }
-
-    /// <summary>Fábrica do vector store. Ex: sp => new QdrantVectorStore(...).</summary>
     public Func<IServiceProvider, IVectorStore>? VectorStoreFactory { get; set; }
 }
