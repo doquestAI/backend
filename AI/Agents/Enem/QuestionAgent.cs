@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using AI.Providers.Abstractions;
 using Domain.Enums;
 using Domain.Interfaces.Agents;
@@ -7,19 +6,20 @@ using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System.Text.RegularExpressions;
 
 namespace AI.Agents.Enem;
 
 /// <summary>Gera questões no estilo ENEM.</summary>
 internal sealed class QuestionAgent(
-    IChatClient                                    chatClient,
+    IChatClient chatClient,
     IEmbeddingGenerator<string, Embedding<float>> embeddingGen,
-    IVectorStore                                   vectorStore,
+    IVectorStore vectorStore,
     [FromKeyedServices(PromptProvider.File)] IPromptProvider promptProvider,
-    IAgentSession                                  session,
-    IAgentMemory                                   memory,
-    IOptions<AgentOptions>                         options,
-    ILogger<QuestionAgent>                         logger)
+    IAgentSession session,
+    IAgentMemory memory,
+    IOptions<AgentOptions> options,
+    ILogger<QuestionAgent> logger)
     : EnemAgentBase<QuestionRequest, EnemQuestion>(chatClient, embeddingGen, vectorStore,
                                                     promptProvider, session, memory, options, logger)
 {
@@ -34,11 +34,11 @@ internal sealed class QuestionAgent(
         var text = response.Message.Text ?? string.Empty;
 
         var question = new EnemQuestion(
-            Statement:   ExtractSection(text, "enunciado"),
-            Options:     ExtractOptions(text),
-            CorrectKey:  ExtractSection(text, "resposta"),
+            Statement: ExtractSection(text, "enunciado"),
+            Options: ExtractOptions(text),
+            CorrectKey: ExtractSection(text, "resposta"),
             Explanation: ExtractSection(text, "explicacao"),
-            Area:        ExtractSection(text, "area")
+            Area: ExtractSection(text, "area")
         );
 
         return Task.FromResult(question);
@@ -51,7 +51,8 @@ internal sealed class QuestionAgent(
     private static IReadOnlyList<string> ExtractOptions(string text)
     {
         var match = Regex.Match(text, @"<opcoes>(.*?)</opcoes>", RegexOptions.Singleline);
-        if (!match.Success) return Array.Empty<string>();
+        if (!match.Success)
+            return Array.Empty<string>();
         return match.Groups[1].Value
             .Split('\n', StringSplitOptions.RemoveEmptyEntries)
             .Select(l => l.Trim())

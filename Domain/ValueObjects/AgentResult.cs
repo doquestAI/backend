@@ -3,9 +3,9 @@ namespace Domain.ValueObjects;
 public sealed record AgentResult<T>(
     T Value,
     bool Success,
-    string? Error      = null,
-    int TokensUsed     = 0,
-    TimeSpan Elapsed   = default
+    string? Error = null,
+    int TokensUsed = 0,
+    TimeSpan Elapsed = default
 )
 {
     public static AgentResult<T> Ok(T value, int tokens = 0, TimeSpan elapsed = default)

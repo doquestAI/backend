@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using AI.Providers.Abstractions;
 using Domain.Enums;
 using Domain.Interfaces.Agents;
@@ -6,6 +5,7 @@ using Domain.ValueObjects;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System.Diagnostics;
 
 namespace AI.Agents.Base;
 
@@ -21,38 +21,26 @@ namespace AI.Agents.Base;
 ///   - Métricas de latência e tokens
 ///   - Template method: subclasses implementam apenas RunCoreAsync
 /// </summary>
-public abstract class AgentBase<TIn, TOut> : IAgent<TIn, TOut>
+public abstract class AgentBase<TIn, TOut>(
+    IChatClient chatClient,
+    IEmbeddingGenerator<string, Embedding<float>> embeddingGen,
+    IVectorStore vectorStore,
+    IPromptProvider promptProvider,
+    IAgentSession session,
+    IAgentMemory memory,
+    IOptions<AgentOptions> options,
+    ILogger logger) : IAgent<TIn, TOut>
 {
-    private   readonly IChatClient                                   _chatClient;
-    private   readonly IEmbeddingGenerator<string, Embedding<float>> _embeddingGen;
-    private   readonly IVectorStore                                   _vectorStore;
-    private   readonly IPromptProvider                                _promptProvider;
-    protected readonly IAgentSession                                  Session;
-    protected readonly IAgentMemory                                   Memory;
-    protected readonly ILogger                                        Logger;
-    protected readonly AgentOptions                                   Options;
+    private readonly IChatClient _chatClient = chatClient;
+    private readonly IEmbeddingGenerator<string, Embedding<float>> _embeddingGen = embeddingGen;
+    private readonly IVectorStore _vectorStore = vectorStore;
+    private readonly IPromptProvider _promptProvider = promptProvider;
+    protected readonly IAgentSession Session = session;
+    protected readonly IAgentMemory Memory = memory;
+    protected readonly ILogger Logger = logger;
+    protected readonly AgentOptions Options = options.Value;
 
     private PromptTemplate? _systemPrompt;
-
-    protected AgentBase(
-        IChatClient                                      chatClient,
-        IEmbeddingGenerator<string, Embedding<float>>   embeddingGen,
-        IVectorStore                                     vectorStore,
-        IPromptProvider                                  promptProvider,
-        IAgentSession                                    session,
-        IAgentMemory                                     memory,
-        IOptions<AgentOptions>                           options,
-        ILogger                                          logger)
-    {
-        _chatClient     = chatClient;
-        _embeddingGen   = embeddingGen;
-        _vectorStore    = vectorStore;
-        _promptProvider = promptProvider;
-        Session         = session;
-        Memory          = memory;
-        Options         = options.Value;
-        Logger          = logger;
-    }
 
     /// <summary>Chave usada para buscar o system prompt e identificar sessão.</summary>
     protected abstract string AgentKey { get; }
@@ -72,14 +60,14 @@ public abstract class AgentBase<TIn, TOut> : IAgent<TIn, TOut>
             await EnsureSystemPromptAsync(cancellationToken);
 
             var processedInput = await PreProcessAsync(input, cancellationToken);
-            var ragContext      = await RetrieveRagContextAsync(processedInput, cancellationToken);
-            var memories        = await RetrieveMemoriesAsync(processedInput, cancellationToken);
-            var messages        = await BuildMessagesAsync(processedInput, ragContext, memories, cancellationToken);
-            var response        = await CompleteAsync(messages, cancellationToken);
+            var ragContext = await RetrieveRagContextAsync(processedInput, cancellationToken);
+            var memories = await RetrieveMemoriesAsync(processedInput, cancellationToken);
+            var messages = await BuildMessagesAsync(processedInput, ragContext, memories, cancellationToken);
+            var response = await CompleteAsync(messages, cancellationToken);
 
-            var inputText  = ExtractTextFromInput(processedInput);
+            var inputText = ExtractTextFromInput(processedInput);
             var outputText = response.Message.Text ?? string.Empty;
-            await Session.AddMessageAsync(AgentMessage.User(inputText),       cancellationToken);
+            await Session.AddMessageAsync(AgentMessage.User(inputText), cancellationToken);
             await Session.AddMessageAsync(AgentMessage.Assistant(outputText), cancellationToken);
 
             await SaveToMemoryAsync(processedInput, outputText, cancellationToken);
@@ -119,9 +107,9 @@ public abstract class AgentBase<TIn, TOut> : IAgent<TIn, TOut>
         {
             var role = msg.Role switch
             {
-                AgentRole.User      => ChatRole.User,
+                AgentRole.User => ChatRole.User,
                 AgentRole.Assistant => ChatRole.Assistant,
-                _                   => ChatRole.System
+                _ => ChatRole.System
             };
             messages.Add(new ChatMessage(role, msg.Content));
         }
@@ -134,8 +122,8 @@ public abstract class AgentBase<TIn, TOut> : IAgent<TIn, TOut>
     {
         var chatOptions = new ChatOptions
         {
-            ModelId         = Options.ModelId,
-            Temperature     = Options.Temperature,
+            ModelId = Options.ModelId,
+            Temperature = Options.Temperature,
             MaxOutputTokens = Options.MaxTokens,
         };
 
@@ -160,17 +148,20 @@ public abstract class AgentBase<TIn, TOut> : IAgent<TIn, TOut>
         try
         {
             var queryText = ExtractTextFromInput(input);
-            if (string.IsNullOrWhiteSpace(queryText)) return null;
+            if (string.IsNullOrWhiteSpace(queryText))
+                return null;
 
             var embedding = await _embeddingGen.GenerateAsync([queryText], null, ct);
-            var vector    = embedding.FirstOrDefault()?.Vector ?? ReadOnlyMemory<float>.Empty;
+            var vector = embedding.FirstOrDefault()?.Vector ?? ReadOnlyMemory<float>.Empty;
 
-            if (vector.IsEmpty) return null;
+            if (vector.IsEmpty)
+                return null;
 
             var results = await _vectorStore.SearchAsync(
                 RagCollection, vector, Options.RagTopK, Options.RagThreshold, ct);
 
-            if (!results.Any()) return null;
+            if (!results.Any())
+                return null;
 
             var chunks = results
                 .OrderByDescending(r => r.Score)
@@ -204,7 +195,8 @@ public abstract class AgentBase<TIn, TOut> : IAgent<TIn, TOut>
 
     private async Task EnsureSystemPromptAsync(CancellationToken ct)
     {
-        if (_systemPrompt is not null) return;
+        if (_systemPrompt is not null)
+            return;
 
         var key = Options.SystemPromptKey ?? AgentKey;
         if (await _promptProvider.ExistsAsync(key, ct))
@@ -219,8 +211,8 @@ public abstract class AgentBase<TIn, TOut> : IAgent<TIn, TOut>
         var vars = new Dictionary<string, string>(GetPromptVariables())
         {
             ["session_id"] = Session.SessionId,
-            ["user_id"]    = Session.UserId,
-            ["date_utc"]   = DateTimeOffset.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"),
+            ["user_id"] = Session.UserId,
+            ["date_utc"] = DateTimeOffset.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"),
         };
 
         if (ragContext is not null)

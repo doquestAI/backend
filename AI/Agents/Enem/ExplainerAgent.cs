@@ -11,18 +11,18 @@ namespace AI.Agents.Enem;
 
 /// <summary>Explica teoria de um tópico do ENEM em detalhes.</summary>
 internal sealed class ExplainerAgent(
-    IChatClient                                    chatClient,
+    IChatClient chatClient,
     IEmbeddingGenerator<string, Embedding<float>> embeddingGen,
-    IVectorStore                                   vectorStore,
+    IVectorStore vectorStore,
     [FromKeyedServices(PromptProvider.File)] IPromptProvider promptProvider,
-    IAgentSession                                  session,
-    IAgentMemory                                   memory,
-    IOptions<AgentOptions>                         options,
-    ILogger<ExplainerAgent>                        logger)
+    IAgentSession session,
+    IAgentMemory memory,
+    IOptions<AgentOptions> options,
+    ILogger<ExplainerAgent> logger)
     : EnemTextAgent<ExplainRequest>(chatClient, embeddingGen, vectorStore, promptProvider,
                                     session, memory, options, logger)
 {
-    protected override string AgentKey      => "enem-explainer";
+    protected override string AgentKey => "enem-explainer";
     protected override string KnowledgeArea => _currentArea;
 
     private string _currentArea = "Geral";

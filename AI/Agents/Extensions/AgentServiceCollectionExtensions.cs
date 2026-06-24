@@ -1,8 +1,8 @@
 using AI.Agents.Enem;
 using AI.Providers;
+using AI.Providers.Abstractions;
 using AI.Providers.Memory;
 using AI.Providers.Session;
-using AI.Providers.Abstractions;
 using Domain.Enums;
 using Domain.Interfaces.Agents;
 using Domain.ValueObjects;
@@ -67,8 +67,8 @@ public static class AgentServiceCollectionExtensions
                 sp.GetRequiredService<IDistributedCache>(),
                 sp.GetRequiredService<ILogger<DistributedCacheAgentSession>>(),
                 sessionId: Guid.NewGuid().ToString("N"),
-                userId:    "anonymous",
-                agentKey:  "default"));
+                userId: "anonymous",
+                agentKey: "default"));
 
         // ── Memory (singleton — persiste entre sessões) ──────────────────────
         services.AddSingleton<IAgentMemory, DistributedCacheAgentMemory>();
@@ -77,50 +77,50 @@ public static class AgentServiceCollectionExtensions
         services.AddOptions<AgentOptions>("enem-helper")
             .Configure(o =>
             {
-                o.ModelId         = infraOptions.DefaultModelId;
-                o.Temperature     = 0.7f;
-                o.MaxTokens       = 1024;
-                o.MaxHistory      = 10;
-                o.EnableRag       = true;
-                o.EnableMemory    = true;
+                o.ModelId = infraOptions.DefaultModelId;
+                o.Temperature = 0.7f;
+                o.MaxTokens = 1024;
+                o.MaxHistory = 10;
+                o.EnableRag = true;
+                o.EnableMemory = true;
                 o.SystemPromptKey = "enem-helper";
             });
 
         services.AddOptions<AgentOptions>("enem-explainer")
             .Configure(o =>
             {
-                o.ModelId         = infraOptions.DefaultModelId;
-                o.Temperature     = 0.4f;
-                o.MaxTokens       = 2048;
-                o.EnableRag       = true;
+                o.ModelId = infraOptions.DefaultModelId;
+                o.Temperature = 0.4f;
+                o.MaxTokens = 2048;
+                o.EnableRag = true;
                 o.SystemPromptKey = "enem-explainer";
             });
 
         services.AddOptions<AgentOptions>("enem-question-generator")
             .Configure(o =>
             {
-                o.ModelId         = infraOptions.DefaultModelId;
-                o.Temperature     = 0.9f;
-                o.MaxTokens       = 1500;
-                o.EnableRag       = true;
+                o.ModelId = infraOptions.DefaultModelId;
+                o.Temperature = 0.9f;
+                o.MaxTokens = 1500;
+                o.EnableRag = true;
                 o.SystemPromptKey = "enem-question-generator";
             });
 
         services.AddOptions<AgentOptions>("enem-feedback")
             .Configure(o =>
             {
-                o.ModelId         = infraOptions.DefaultModelId;
-                o.Temperature     = 0.2f;
-                o.MaxTokens       = 512;
-                o.EnableMemory    = true;
+                o.ModelId = infraOptions.DefaultModelId;
+                o.Temperature = 0.2f;
+                o.MaxTokens = 512;
+                o.EnableMemory = true;
                 o.SystemPromptKey = "enem-feedback";
             });
 
         // ── Agentes concretos (transient — criados por request) ──────────────
         services.AddTransient<HelperEnemAgent>(sp => sp.ResolveAgent<HelperEnemAgent>("enem-helper"));
-        services.AddTransient<ExplainerAgent> (sp => sp.ResolveAgent<ExplainerAgent> ("enem-explainer"));
-        services.AddTransient<QuestionAgent>  (sp => sp.ResolveAgent<QuestionAgent>  ("enem-question-generator"));
-        services.AddTransient<FeedbackAgent>  (sp => sp.ResolveAgent<FeedbackAgent>  ("enem-feedback"));
+        services.AddTransient<ExplainerAgent>(sp => sp.ResolveAgent<ExplainerAgent>("enem-explainer"));
+        services.AddTransient<QuestionAgent>(sp => sp.ResolveAgent<QuestionAgent>("enem-question-generator"));
+        services.AddTransient<FeedbackAgent>(sp => sp.ResolveAgent<FeedbackAgent>("enem-feedback"));
 
         // Exposição via interface para consumo externo
         services.AddTransient<IAgent<string, string>>(

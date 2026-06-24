@@ -33,7 +33,8 @@ internal class AccountSubscription : Entity
     {
         var status = new SubscriptionStatus(SubscriptionStatus.Active);
         AddNotificationsFromValueObjects(status);
-        if (!IsValid) return;
+        if (!IsValid)
+            return;
 
         Status = status;
     }
@@ -42,7 +43,8 @@ internal class AccountSubscription : Entity
     {
         var status = new SubscriptionStatus(SubscriptionStatus.Cancelled);
         AddNotificationsFromValueObjects(status);
-        if (!IsValid) return;
+        if (!IsValid)
+            return;
 
         Status = status;
     }
@@ -51,7 +53,8 @@ internal class AccountSubscription : Entity
     {
         var status = new SubscriptionStatus(SubscriptionStatus.Paused);
         AddNotificationsFromValueObjects(status);
-        if (!IsValid) return;
+        if (!IsValid)
+            return;
 
         Status = status;
     }

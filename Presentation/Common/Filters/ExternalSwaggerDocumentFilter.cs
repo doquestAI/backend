@@ -10,21 +10,14 @@ namespace Presentation.Common.Filters;
 /// Filtro que mescla documentação Swagger de serviços externos no documento principal.
 /// Busca o Swagger do serviço RAG e adiciona seus endpoints com prefixo /api/rag
 /// </summary>
-internal class ExternalSwaggerDocumentFilter : IDocumentFilter
+internal class ExternalSwaggerDocumentFilter(
+    IHttpClientFactory httpClientFactory,
+    IConfiguration configuration,
+    ILogger<ExternalSwaggerDocumentFilter> logger) : IDocumentFilter
 {
-    private readonly IHttpClientFactory _httpClientFactory;
-    private readonly IConfiguration _configuration;
-    private readonly ILogger<ExternalSwaggerDocumentFilter> _logger;
-
-    public ExternalSwaggerDocumentFilter(
-        IHttpClientFactory httpClientFactory,
-        IConfiguration configuration,
-        ILogger<ExternalSwaggerDocumentFilter> logger)
-    {
-        _httpClientFactory = httpClientFactory;
-        _configuration = configuration;
-        _logger = logger;
-    }
+    private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
+    private readonly IConfiguration _configuration = configuration;
+    private readonly ILogger<ExternalSwaggerDocumentFilter> _logger = logger;
 
     public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
     {
@@ -311,7 +304,8 @@ internal class ExternalSwaggerDocumentFilter : IDocumentFilter
 
     private OpenApiParameter? BuildOpenApiParameter(JObject? paramJson)
     {
-        if (paramJson == null) return null;
+        if (paramJson == null)
+            return null;
 
         var parameter = new OpenApiParameter();
         parameter.Name = paramJson["name"]?.ToString() ?? "";
@@ -331,7 +325,8 @@ internal class ExternalSwaggerDocumentFilter : IDocumentFilter
 
     private OpenApiRequestBody? BuildOpenApiRequestBody(JObject? requestBodyJson)
     {
-        if (requestBodyJson == null) return null;
+        if (requestBodyJson == null)
+            return null;
 
         var reqBody = new OpenApiRequestBody
         {
@@ -358,7 +353,8 @@ internal class ExternalSwaggerDocumentFilter : IDocumentFilter
 
     private OpenApiResponse? BuildOpenApiResponse(JObject? responseJson)
     {
-        if (responseJson == null) return null;
+        if (responseJson == null)
+            return null;
 
         var response = new OpenApiResponse
         {
@@ -384,7 +380,8 @@ internal class ExternalSwaggerDocumentFilter : IDocumentFilter
 
     private OpenApiMediaType? BuildOpenApiMediaType(JObject? mediaTypeJson)
     {
-        if (mediaTypeJson == null) return null;
+        if (mediaTypeJson == null)
+            return null;
 
         var mediaType = new OpenApiMediaType();
 
@@ -399,7 +396,8 @@ internal class ExternalSwaggerDocumentFilter : IDocumentFilter
 
     private static IOpenApiSchema? BuildOpenApiSchema(JObject? schemaJson)
     {
-        if (schemaJson == null) return null;
+        if (schemaJson == null)
+            return null;
 
         // Se for uma referência ($ref), criar OpenApiSchemaReference
         var refValue = schemaJson["$ref"]?.ToString();

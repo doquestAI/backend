@@ -7,14 +7,9 @@ using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Services.Azure.BlobStorage;
 
-internal sealed class AzureBlobStorageService : ICloudStorageService
+internal sealed class AzureBlobStorageService(IOptions<AzureSettings> settings) : ICloudStorageService
 {
-    private readonly BlobServiceClient _blobServiceClient;
-
-    public AzureBlobStorageService(IOptions<AzureSettings> settings)
-    {
-        _blobServiceClient = new BlobServiceClient(settings.Value.ConnectionString);
-    }
+    private readonly BlobServiceClient _blobServiceClient = new BlobServiceClient(settings.Value.ConnectionString);
 
     public async Task<string> UploadFileAsync(
         string containerName,

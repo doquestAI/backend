@@ -11,14 +11,14 @@ namespace AI.Agents.Enem;
 
 /// <summary>Corrige e avalia a resposta do candidato.</summary>
 internal sealed class FeedbackAgent(
-    IChatClient                                    chatClient,
+    IChatClient chatClient,
     IEmbeddingGenerator<string, Embedding<float>> embeddingGen,
-    IVectorStore                                   vectorStore,
+    IVectorStore vectorStore,
     [FromKeyedServices(PromptProvider.File)] IPromptProvider promptProvider,
-    IAgentSession                                  session,
-    IAgentMemory                                   memory,
-    IOptions<AgentOptions>                         options,
-    ILogger<FeedbackAgent>                         logger)
+    IAgentSession session,
+    IAgentMemory memory,
+    IOptions<AgentOptions> options,
+    ILogger<FeedbackAgent> logger)
     : EnemAgentBase<FeedbackRequest, FeedbackResult>(chatClient, embeddingGen, vectorStore,
                                                       promptProvider, session, memory, options, logger)
 {
@@ -34,9 +34,9 @@ internal sealed class FeedbackAgent(
         var text = response.Message.Text ?? string.Empty;
 
         return Task.FromResult(new FeedbackResult(
-            IsCorrect:   text.Contains("correta", StringComparison.OrdinalIgnoreCase),
+            IsCorrect: text.Contains("correta", StringComparison.OrdinalIgnoreCase),
             Explanation: text,
-            Score:       text.Contains("correta", StringComparison.OrdinalIgnoreCase) ? 1f : 0f
+            Score: text.Contains("correta", StringComparison.OrdinalIgnoreCase) ? 1f : 0f
         ));
     }
 
@@ -44,7 +44,7 @@ internal sealed class FeedbackAgent(
         FeedbackRequest input, string response, CancellationToken ct)
     {
         var correct = response.Contains("correta", StringComparison.OrdinalIgnoreCase);
-        var key     = $"performance:{input.Area}:{DateTimeOffset.UtcNow:yyyyMMddHHmmss}";
+        var key = $"performance:{input.Area}:{DateTimeOffset.UtcNow:yyyyMMddHHmmss}";
         await Memory.SaveFactAsync(key, $"Área: {input.Area} | Acertou: {correct}", ct);
     }
 }

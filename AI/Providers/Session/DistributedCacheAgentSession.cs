@@ -1,8 +1,8 @@
-using System.Text.Json;
 using Domain.Interfaces.Agents;
 using Domain.ValueObjects;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
+using System.Text.Json;
 
 namespace AI.Providers.Session;
 
@@ -19,8 +19,8 @@ internal sealed class DistributedCacheAgentSession(
     : IAgentSession
 {
     public string SessionId { get; } = sessionId;
-    public string UserId    { get; } = userId;
-    public string AgentKey  { get; } = agentKey;
+    public string UserId { get; } = userId;
+    public string AgentKey { get; } = agentKey;
 
     private string CacheKey => $"session:{AgentKey}:{UserId}:{SessionId}";
 
@@ -49,7 +49,8 @@ internal sealed class DistributedCacheAgentSession(
     private async Task<List<AgentMessage>> GetHistoryInternalAsync(CancellationToken ct)
     {
         var json = await cache.GetStringAsync(CacheKey, ct);
-        if (json is null) return [];
+        if (json is null)
+            return [];
         return JsonSerializer.Deserialize<List<AgentMessage>>(json) ?? [];
     }
 }

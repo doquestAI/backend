@@ -8,12 +8,8 @@ using System.Reflection;
 
 namespace Infrastructure.Data;
 
-internal class CoreDbContext : DbContext
+internal class CoreDbContext(DbContextOptions<CoreDbContext> options) : DbContext(options)
 {
-    public CoreDbContext(DbContextOptions<CoreDbContext> options) : base(options)
-    {
-    }
-
     public DbSet<Document> Documents { get; init; }
     public DbSet<Subscription> Subscriptions { get; init; }
     public DbSet<FreeSubscription> FreeSubscriptions { get; init; }

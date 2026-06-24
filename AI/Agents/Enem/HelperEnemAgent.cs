@@ -11,14 +11,14 @@ namespace AI.Agents.Enem;
 
 /// <summary>Responde dúvidas gerais sobre o ENEM.</summary>
 internal sealed class HelperEnemAgent(
-    IChatClient                                    chatClient,
+    IChatClient chatClient,
     IEmbeddingGenerator<string, Embedding<float>> embeddingGen,
-    IVectorStore                                   vectorStore,
+    IVectorStore vectorStore,
     [FromKeyedServices(PromptProvider.File)] IPromptProvider promptProvider,
-    IAgentSession                                  session,
-    IAgentMemory                                   memory,
-    IOptions<AgentOptions>                         options,
-    ILogger<HelperEnemAgent>                       logger)
+    IAgentSession session,
+    IAgentMemory memory,
+    IOptions<AgentOptions> options,
+    ILogger<HelperEnemAgent> logger)
     : EnemTextAgent<string>(chatClient, embeddingGen, vectorStore, promptProvider,
                              session, memory, options, logger)
 {

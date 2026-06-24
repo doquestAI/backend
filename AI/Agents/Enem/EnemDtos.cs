@@ -5,11 +5,11 @@ public sealed record ExplainRequest(string Topic, string Area);
 public sealed record QuestionRequest(string Topic, string Area, string Difficulty = "Médio");
 
 public sealed record EnemQuestion(
-    string               Statement,
+    string Statement,
     IReadOnlyList<string> Options,
-    string               CorrectKey,
-    string               Explanation,
-    string               Area);
+    string CorrectKey,
+    string Explanation,
+    string Area);
 
 public sealed record FeedbackRequest(
     string Question,
