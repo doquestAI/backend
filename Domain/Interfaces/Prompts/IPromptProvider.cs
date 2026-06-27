@@ -1,10 +1,10 @@
 using Domain.ValueObjects;
 
-namespace AI.Providers.Abstractions;
+namespace Domain.Interfaces.Prompts;
 
 /// <summary>
 /// Carrega templates de prompt de diversas fontes (arquivo, banco, remoto).
-/// Registrado com Keyed DI pelo enum PromptProvider.
+/// Registrado com Keyed DI pelo enum <c>Domain.Enums.PromptProvider</c>.
 /// </summary>
 public interface IPromptProvider
 {

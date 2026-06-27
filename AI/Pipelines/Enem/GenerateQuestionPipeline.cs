@@ -1,14 +1,14 @@
-using Application.Pipelines.Builder;
-using Application.Pipelines.Enem.Abstractions;
+using AI.Pipelines.Builder;
 using Domain.Agents.Enem;
 using Domain.Interfaces.Agents;
 using Domain.Interfaces.Context;
+using Domain.Interfaces.Pipelines.Enem;
 using Microsoft.Extensions.Logging;
 
-namespace Application.Pipelines.Enem;
+namespace AI.Pipelines.Enem;
 
 /// <summary>
-/// Pipeline: Validar → Logar → Chamar QuestionAgent (com sessão por usuário) → Verificar saída.
+/// Pipeline: Validar → Logar → QuestionAgent (sessão por usuário) → Verificar saída.
 /// </summary>
 internal sealed class GenerateQuestionPipeline(
     IAgent<QuestionRequest, EnemQuestion> agent,

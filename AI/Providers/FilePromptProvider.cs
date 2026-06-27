@@ -1,4 +1,4 @@
-using AI.Providers.Abstractions;
+using Domain.Interfaces.Prompts;
 using Domain.ValueObjects;
 using Microsoft.Extensions.Logging;
 

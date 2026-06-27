@@ -1,8 +1,8 @@
-namespace AI.Providers.Abstractions;
+namespace Domain.Interfaces.Vector;
 
 /// <summary>
 /// Armazenamento vetorial para RAG.
-/// Implementação pode ser Qdrant, Pinecone, Azure AI Search, etc.
+/// Implementação concreta vive na camada AI/Infrastructure (Qdrant, Pinecone, Azure AI Search, etc.).
 /// </summary>
 public interface IVectorStore
 {

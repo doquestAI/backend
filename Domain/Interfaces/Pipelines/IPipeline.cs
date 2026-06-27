@@ -1,8 +1,8 @@
-namespace Application.Pipelines.Abstractions;
+namespace Domain.Interfaces.Pipelines;
 
 /// <summary>
 /// Pipeline tipado que recebe <typeparamref name="TIn"/> e produz <typeparamref name="TOut"/>.
-/// Composto via <see cref="Builder.Pipeline"/>.Start em estilo LangChain Chain.
+/// Implementação concreta vive na camada AI (composto via PipelineBuilder em estilo LangChain).
 /// </summary>
 public interface IPipeline<in TIn, TOut>
 {

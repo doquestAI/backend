@@ -6,7 +6,8 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace Presentation.Filters;
 
-public class BaseResponseOperationFilter : IOperationFilter
+public class BaseResponseOperationFilter
+    : IOperationFilter
 {
     public void Apply(OpenApiOperation operation, OperationFilterContext context)
     {

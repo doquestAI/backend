@@ -1,11 +1,14 @@
 using AI.Agents.Enem;
+using AI.Pipelines.Enem;
 using AI.Providers;
-using AI.Providers.Abstractions;
 using AI.Providers.Context;
 using AI.Providers.Session;
 using Domain.Agents.Enem;
 using Domain.Enums;
 using Domain.Interfaces.Agents;
+using Domain.Interfaces.Pipelines.Enem;
+using Domain.Interfaces.Prompts;
+using Domain.Interfaces.Vector;
 using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Caching.Distributed;
@@ -87,6 +90,11 @@ public static class AgentServiceCollectionExtensions
 
         services.AddScoped<IAgent<QuestionRequest, EnemQuestion>>(sp => sp.GetRequiredService<QuestionAgent>());
         services.AddScoped<IAgent<FeedbackRequest, FeedbackResult>>(sp => sp.GetRequiredService<FeedbackAgent>());
+
+        services.AddScoped<IGenerateQuestionPipeline, GenerateQuestionPipeline>();
+        services.AddScoped<IExplainTopicPipeline, ExplainTopicPipeline>();
+        services.AddScoped<IGradeAnswerPipeline, GradeAnswerPipeline>();
+        services.AddScoped<IAskHelperPipeline, AskHelperPipeline>();
 
         return services;
     }

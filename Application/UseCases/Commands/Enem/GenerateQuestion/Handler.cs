@@ -1,6 +1,6 @@
-using Application.Pipelines.Abstractions;
-using Application.Pipelines.Enem.Abstractions;
 using Domain.Agents.Enem;
+using Domain.Exceptions;
+using Domain.Interfaces.Pipelines.Enem;
 using MediatR;
 
 namespace Application.UseCases.Commands.Enem.GenerateQuestion;

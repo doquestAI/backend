@@ -1,15 +1,13 @@
-using Application.Pipelines.Builder;
-using Application.Pipelines.Enem.Abstractions;
+using AI.Pipelines.Builder;
 using Domain.Agents.Enem;
 using Domain.Interfaces.Agents;
 using Domain.Interfaces.Context;
+using Domain.Interfaces.Pipelines.Enem;
 using Microsoft.Extensions.Logging;
 
-namespace Application.Pipelines.Enem;
+namespace AI.Pipelines.Enem;
 
-/// <summary>
-/// Pipeline: Validar → Logar → FeedbackAgent → Logar resultado.
-/// </summary>
+/// <summary>Pipeline: Validar → Logar → FeedbackAgent → Logar resultado.</summary>
 internal sealed class GradeAnswerPipeline(
     IAgent<FeedbackRequest, FeedbackResult> agent,
     IUserContext userContext,

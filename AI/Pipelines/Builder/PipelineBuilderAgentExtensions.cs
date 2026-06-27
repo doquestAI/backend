@@ -1,6 +1,6 @@
 using Domain.Interfaces.Agents;
 
-namespace Application.Pipelines.Builder;
+namespace AI.Pipelines.Builder;
 
 /// <summary>
 /// Extensões que integram <see cref="IAgent{TIn,TOut}"/> e <see cref="IStreamingAgent{TIn}"/>

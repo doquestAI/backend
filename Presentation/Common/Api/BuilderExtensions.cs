@@ -1,3 +1,4 @@
+using AI.Agents.Extensions;
 using Application.DI;
 using Domain.Configurations;
 using Domain.Interfaces.Context;
@@ -245,6 +246,17 @@ internal static class BuilderExtensions
         builder.Services.ConfigureApplicationServices();
         builder.Services.ConfigureInfrastructureServices();
         builder.Services.AddAllBackgroundServices();
+
+        // ── Microsoft Agent Framework — wiring para o pipeline ENEM ─────────
+        // Plugue aqui o provider escolhido (OpenAI / Azure OpenAI / Ollama / Foundry)
+        // e o vector store (Qdrant / Azure AI Search / Pinecone).
+        // Enquanto não plugado, as rotas /Enem/* retornam 500 com mensagem clara.
+        builder.Services.AddAgents(opt =>
+        {
+            // opt.ChatClientBuilder = new OpenAIChatClient(...);
+            // opt.EmbeddingGeneratorBuilder = new OpenAIEmbeddingGenerator(...);
+            // opt.VectorStoreFactory = sp => new QdrantVectorStore(...);
+        });
 
         var cacheSettings = builder.Configuration.GetSection("CacheSettings").Get<CacheSettings>() ?? new CacheSettings();
         builder.Services.AddCacheServices(cacheSettings);

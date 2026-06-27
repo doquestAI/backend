@@ -1,4 +1,4 @@
-using AI.Providers.Abstractions;
+using Domain.Interfaces.Vector;
 using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;

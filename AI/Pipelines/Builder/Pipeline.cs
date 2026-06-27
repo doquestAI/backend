@@ -1,4 +1,4 @@
-namespace Application.Pipelines.Builder;
+namespace AI.Pipelines.Builder;
 
 /// <summary>
 /// Entry point para criar pipelines tipados em estilo LangChain Chain:

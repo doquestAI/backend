@@ -1,12 +1,12 @@
-using Application.Pipelines.Abstractions;
-using Application.Pipelines.Builder;
-using Application.Pipelines.Enem.Abstractions;
+using AI.Pipelines.Builder;
+using Domain.Exceptions;
 using Domain.Interfaces.Agents;
 using Domain.Interfaces.Context;
+using Domain.Interfaces.Pipelines.Enem;
 using Microsoft.Extensions.Logging;
 using System.Runtime.CompilerServices;
 
-namespace Application.Pipelines.Enem;
+namespace AI.Pipelines.Enem;
 
 /// <summary>
 /// Pipeline: Validar → Logar → HelperAgent (síncrono OU streaming).
