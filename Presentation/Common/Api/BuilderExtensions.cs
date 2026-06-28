@@ -24,6 +24,7 @@ internal static class BuilderExtensions
     internal static void AddConfiguration(this WebApplicationBuilder builder)
     {
         builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
+        builder.Services.Configure<ObservabilitySettings>(builder.Configuration.GetSection("ObservabilitySettings"));
         builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
         builder.Services.Configure<AzureSettings>(builder.Configuration.GetSection("AzureStorageSettings"));
         builder.Services.Configure<AzureAdSettings>(builder.Configuration.GetSection("AzureAd"));

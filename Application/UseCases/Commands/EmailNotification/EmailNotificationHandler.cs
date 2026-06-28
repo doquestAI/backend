@@ -14,8 +14,8 @@ internal class EmailNotificationHandler(IEmailService emailService)
             message.RecipientEmail,
             message.Subject,
             message.Content,
-            message.SenderName ?? "Kdesk Team",
-            message.SenderEmail ?? "no-reply@Kdesk.com",
+            message.SenderName ?? "DoQuest Team",
+            message.SenderEmail ?? "no-reply@doquest.com",
             cancellationToken
         );
 }

@@ -1,11 +1,12 @@
 using AI.Agents.Enem;
+using AI.Capabilities.Extensions;
+using AI.Common.Config;
 using AI.Pipelines.Enem;
 using AI.Providers;
 using AI.Providers.Context;
 using AI.Providers.Session;
-using Domain.Agents.Enem;
+using Domain.Agents;
 using Domain.Enums;
-using Domain.Interfaces.Agents;
 using Domain.Interfaces.Pipelines.Enem;
 using Domain.Interfaces.Prompts;
 using Domain.Interfaces.Vector;
@@ -18,13 +19,11 @@ using Microsoft.Extensions.Logging;
 namespace AI.Agents.Extensions;
 
 /// <summary>
-/// Registro de DI dos agentes usando Microsoft Agent Framework (MAF) 1.x.
+/// Registro de DI dos Agents e Pipelines.
 ///
-/// Cada agente concreto é registrado em duas camadas:
-///   1. <see cref="AIAgent"/> (keyed por <see cref="AgentKeys"/>) — instância nativa do MAF
-///      configurada com Instructions, ChatOptions, AIContextProviders e wrap de OpenTelemetryAgent.
-///   2. Wrapper de domínio (<see cref="HelperEnemAgent"/>, etc.) — expõe
-///      <see cref="IAgent{TIn,TOut}"/> tipado para a camada de aplicação.
+/// Agora cada agente concreto é UMA LINHA — herda <c>AgentBase : ChatClientAgent</c>
+/// e recebe um <see cref="AgentConfig"/> keyed via DI. Não há mais wrappers ou
+/// composição manual de inner+session+resolver.
 /// </summary>
 public static class AgentServiceCollectionExtensions
 {
@@ -60,37 +59,34 @@ public static class AgentServiceCollectionExtensions
         // ── Prompt provider keyed (File por padrão) ─────────────────────────
         services.AddKeyedSingleton<IPromptProvider, FilePromptProvider>(PromptProvider.File);
 
-        // ── Session cache compartilhado entre todos os agentes ──────────────
+        // ── Session cache e Capabilities ────────────────────────────────────
         services.AddSingleton<AgentSessionCache>();
+        services.AddAgentCapabilities();
 
-        // ── Registra um AIAgent por nome usando AddKeyedSingleton ───────────
-        RegisterEnemAgent(services, AgentKeys.Helper,
+        // ── Configuração keyed de cada Agent ENEM ───────────────────────────
+        RegisterAgentConfig(services, AgentKeys.Helper, AgentRole.Helper,
+            description: "Responde dúvidas gerais sobre o ENEM",
             ragCollection: "enem-knowledge", temperature: 0.7f, maxTokens: 1024, enableMemory: true);
 
-        RegisterEnemAgent(services, AgentKeys.Explainer,
+        RegisterAgentConfig(services, AgentKeys.Explainer, AgentRole.Specialist,
+            description: "Explica teoria de tópicos do ENEM em detalhes",
             ragCollection: "enem-knowledge", temperature: 0.4f, maxTokens: 2048, enableMemory: false);
 
-        RegisterEnemAgent(services, AgentKeys.QuestionGenerator,
+        RegisterAgentConfig(services, AgentKeys.QuestionGenerator, AgentRole.Generator,
+            description: "Gera questões estilo ENEM com gabarito",
             ragCollection: "enem-knowledge", temperature: 0.9f, maxTokens: 1500, enableMemory: false);
 
-        RegisterEnemAgent(services, AgentKeys.Feedback,
+        RegisterAgentConfig(services, AgentKeys.Feedback, AgentRole.Evaluator,
+            description: "Corrige e avalia respostas do candidato",
             ragCollection: null, temperature: 0.2f, maxTokens: 512, enableMemory: true);
 
-        // ── Wrappers de domínio expostos via IAgent<TIn,TOut> ───────────────
+        // ── Agents concretos (cada um é uma linha herdando AgentBase) ───────
         services.AddScoped<HelperEnemAgent>();
         services.AddScoped<ExplainerAgent>();
         services.AddScoped<QuestionAgent>();
         services.AddScoped<FeedbackAgent>();
 
-        services.AddScoped<IAgent<string, string>>(sp => sp.GetRequiredService<HelperEnemAgent>());
-        services.AddScoped<IStreamingAgent<string>>(sp => sp.GetRequiredService<HelperEnemAgent>());
-
-        services.AddScoped<IAgent<ExplainRequest, string>>(sp => sp.GetRequiredService<ExplainerAgent>());
-        services.AddScoped<IStreamingAgent<ExplainRequest>>(sp => sp.GetRequiredService<ExplainerAgent>());
-
-        services.AddScoped<IAgent<QuestionRequest, EnemQuestion>>(sp => sp.GetRequiredService<QuestionAgent>());
-        services.AddScoped<IAgent<FeedbackRequest, FeedbackResult>>(sp => sp.GetRequiredService<FeedbackAgent>());
-
+        // ── Pipelines concretas (Domain interfaces) ─────────────────────────
         services.AddScoped<IGenerateQuestionPipeline, GenerateQuestionPipeline>();
         services.AddScoped<IExplainTopicPipeline, ExplainTopicPipeline>();
         services.AddScoped<IGradeAnswerPipeline, GradeAnswerPipeline>();
@@ -99,39 +95,40 @@ public static class AgentServiceCollectionExtensions
         return services;
     }
 
-    private static void RegisterEnemAgent(
+    private static void RegisterAgentConfig(
         IServiceCollection services,
         string key,
+        AgentRole role,
+        string description,
         string? ragCollection,
         float temperature,
         int maxTokens,
         bool enableMemory)
     {
-        services.AddKeyedSingleton<AIAgent>(key, (sp, _) =>
+        services.AddKeyedSingleton(key, (sp, _) =>
         {
-            var chatClient = sp.GetRequiredService<IChatClient>();
-            var loggerFactory = sp.GetRequiredService<ILoggerFactory>();
             var promptProvider = sp.GetRequiredKeyedService<IPromptProvider>(PromptProvider.File);
-
             var instructions = LoadInstructions(promptProvider, key);
             var contextProviders = BuildContextProviders(sp, key, ragCollection, enableMemory);
 
-            var options = new ChatClientAgentOptions
+            return new AgentConfig
             {
                 Name = key,
-                ChatOptions = new ChatOptions
+                Description = description,
+                Role = role,
+                SystemPrompt = instructions,
+                Temperature = temperature,
+                MaxOutputTokens = maxTokens,
+                ContextProviders = contextProviders,
+                Capabilities = new AgentCapabilities
                 {
-                    Instructions = instructions,
-                    Temperature = temperature,
-                    MaxOutputTokens = maxTokens,
+                    SupportsStreaming = true,
+                    SupportsFunctionCalling = true,
+                    SupportsRag = ragCollection is not null,
+                    SupportsLongTermMemory = enableMemory,
+                    SupportsMcp = false,
                 },
-                AIContextProviders = contextProviders,
             };
-
-            AIAgent agent = new ChatClientAgent(chatClient, options, loggerFactory);
-
-            // Decora com OpenTelemetryAgent: emite traces GenAI Semantic Conventions automaticamente.
-            return new OpenTelemetryAgent(agent, sourceName: $"DoQuest.AI.{key}");
         });
     }
 

@@ -1,32 +1,39 @@
-using AI.Pipelines.Builder;
+using AI.Agents.Enem;
+using AI.Pipelines.Enem.Steps;
 using Domain.Agents.Enem;
-using Domain.Interfaces.Agents;
 using Domain.Interfaces.Context;
 using Domain.Interfaces.Pipelines.Enem;
+using Domain.Pipelines;
+using Domain.Pipelines.Steps;
 using Microsoft.Extensions.Logging;
 
 namespace AI.Pipelines.Enem;
 
-/// <summary>Pipeline: Validar → Logar → FeedbackAgent → Logar resultado.</summary>
-internal sealed class GradeAnswerPipeline(
-    IAgent<FeedbackRequest, FeedbackResult> agent,
-    IUserContext userContext,
-    ILogger<GradeAnswerPipeline> logger) : IGradeAnswerPipeline
+/// <summary>Pipeline: Validar → Logar → FeedbackAgent → Logar saída.</summary>
+public sealed class GradeAnswerPipeline : Pipeline<FeedbackRequest, FeedbackResult>, IGradeAnswerPipeline
 {
-    public Task<FeedbackResult> RunAsync(FeedbackRequest input, CancellationToken cancellationToken = default)
+    public GradeAnswerPipeline(
+        FeedbackAgent agent,
+        IUserContext userContext,
+        ILogger<GradeAnswerPipeline> logger) : base("GradeAnswer")
     {
         var sessionKey = $"enem:feedback:{userContext.UserId}";
 
-        return Pipeline.Start<FeedbackRequest>()
-            .Validate(r => !string.IsNullOrWhiteSpace(r.Question), "Questão é obrigatória.")
-            .Validate(r => !string.IsNullOrWhiteSpace(r.StudentAnswer), "Resposta do aluno é obrigatória.")
-            .Validate(r => !string.IsNullOrWhiteSpace(r.CorrectAnswer), "Gabarito é obrigatório.")
-            .Tap(r => logger.LogInformation(
-                "[GradeAnswer] User={UserId} Area={Area}", userContext.UserId, r.Area))
-            .ThenAgent(agent, sessionKey)
-            .Tap(f => logger.LogInformation(
-                "[GradeAnswer] IsCorrect={IsCorrect} Score={Score}", f.IsCorrect, f.Score))
-            .Build()
-            .RunAsync(input, cancellationToken);
+        AddStep(new ValidationStep<FeedbackRequest>(
+                nameof(FeedbackRequest.Question),
+                r => !string.IsNullOrWhiteSpace(r.Question),
+                "Questão é obrigatória."))
+            .AddStep(new ValidationStep<FeedbackRequest>(
+                nameof(FeedbackRequest.StudentAnswer),
+                r => !string.IsNullOrWhiteSpace(r.StudentAnswer),
+                "Resposta do aluno é obrigatória."))
+            .AddStep(new ValidationStep<FeedbackRequest>(
+                nameof(FeedbackRequest.CorrectAnswer),
+                r => !string.IsNullOrWhiteSpace(r.CorrectAnswer),
+                "Gabarito é obrigatório."))
+            .AddStep(new LoggingStep(
+                "LogInput", logger,
+                ctx => $"[GradeAnswer] User={userContext.UserId}"))
+            .AddStep(new GradeAnswerStep(agent, sessionKey));
     }
 }

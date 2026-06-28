@@ -1,6 +1,7 @@
 using Domain.Configurations;
 using Infrastructure.DI;
 using Presentation.Common.Api;
+using Presentation.Common.Observability;
 using Presentation.Middlewares;
 
 
@@ -36,6 +37,7 @@ builder.WebHost.ConfigureKestrel((context, options) =>
     options.ListenAnyIP(5070);
 });
 
+builder.AddObservability();
 builder.AddConfiguration();
 builder.AddRateLimiting();
 var appSettings = builder.Configuration.GetSection("AppSettings").Get<AppSettings>()

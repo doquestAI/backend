@@ -1,5 +1,4 @@
 using Domain.Agents.Enem;
-using Domain.Exceptions;
 using Domain.Interfaces.Pipelines.Enem;
 using MediatR;
 
@@ -10,21 +9,21 @@ internal sealed class Handler(IGradeAnswerPipeline pipeline)
 {
     public async Task<Response> Handle(Request request, CancellationToken cancellationToken)
     {
-        try
-        {
-            var feedback = await pipeline.RunAsync(
-                new FeedbackRequest(request.Question, request.StudentAnswer, request.CorrectAnswer, request.Area),
-                cancellationToken);
+        var result = await pipeline.RunAsync(
+            new FeedbackRequest(request.Question, request.StudentAnswer, request.CorrectAnswer, request.Area),
+            cancellationToken);
 
+        if (!result.IsValid)
             return new Response(
-                StatusCode: 200,
-                IsCorrect: feedback.IsCorrect,
-                Explanation: feedback.Explanation,
-                Score: feedback.Score);
-        }
-        catch (PipelineValidationException ex)
-        {
-            return new Response(StatusCode: 400, Message: ex.Message);
-        }
+                StatusCode: 400,
+                Message: string.Join("; ", result.Notifications.Select(n => n.Message)),
+                Notifications: result.Notifications.ToList());
+
+        var feedback = result.Value!;
+        return new Response(
+            StatusCode: 200,
+            IsCorrect: feedback.IsCorrect,
+            Explanation: feedback.Explanation,
+            Score: feedback.Score);
     }
 }

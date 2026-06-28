@@ -1,5 +1,4 @@
 using Domain.Agents.Enem;
-using Domain.Exceptions;
 using Domain.Interfaces.Pipelines.Enem;
 using MediatR;
 
@@ -10,23 +9,23 @@ internal sealed class Handler(IGenerateQuestionPipeline pipeline)
 {
     public async Task<Response> Handle(Request request, CancellationToken cancellationToken)
     {
-        try
-        {
-            var question = await pipeline.RunAsync(
-                new QuestionRequest(request.Topic, request.Area, request.Difficulty),
-                cancellationToken);
+        var result = await pipeline.RunAsync(
+            new QuestionRequest(request.Topic, request.Area, request.Difficulty),
+            cancellationToken);
 
+        if (!result.IsValid)
             return new Response(
-                StatusCode: 200,
-                Statement: question.Statement,
-                Options: question.Options,
-                CorrectKey: question.CorrectKey,
-                Explanation: question.Explanation,
-                Area: question.Area);
-        }
-        catch (PipelineValidationException ex)
-        {
-            return new Response(StatusCode: 400, Message: ex.Message);
-        }
+                StatusCode: 400,
+                Message: string.Join("; ", result.Notifications.Select(n => n.Message)),
+                Notifications: result.Notifications.ToList());
+
+        var question = result.Value!;
+        return new Response(
+            StatusCode: 200,
+            Statement: question.Statement,
+            Options: question.Options,
+            CorrectKey: question.CorrectKey,
+            Explanation: question.Explanation,
+            Area: question.Area);
     }
 }

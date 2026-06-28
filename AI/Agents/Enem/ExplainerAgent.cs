@@ -1,19 +1,16 @@
+using AI.Agents.Base;
+using AI.Common.Config;
 using AI.Providers.Session;
-using Domain.Agents.Enem;
-using Domain.Interfaces.Agents;
-using Microsoft.Agents.AI;
+using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace AI.Agents.Enem;
 
-/// <summary>Explica teoria de um tópico do ENEM em detalhes.</summary>
-internal sealed class ExplainerAgent(
-    [FromKeyedServices(AgentKeys.Explainer)] AIAgent inner,
-    AgentSessionCache sessionCache)
-    : EnemTextAgent<ExplainRequest>(inner, sessionCache),
-      IAgent<ExplainRequest, string>,
-      IStreamingAgent<ExplainRequest>
-{
-    protected override string FormatInput(ExplainRequest input)
-        => $"Explique detalhadamente sobre: {input.Topic}. Área: {input.Area}";
-}
+/// <summary>Explica teoria de tópicos do ENEM em detalhes.</summary>
+public sealed class ExplainerAgent(
+    IChatClient client,
+    [FromKeyedServices(AgentKeys.Explainer)] AgentConfig config,
+    AgentSessionCache sessionCache,
+    ILoggerFactory loggerFactory)
+    : AgentBase(client, config, sessionCache, loggerFactory);

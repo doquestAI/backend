@@ -1,32 +1,38 @@
-using AI.Pipelines.Builder;
+using AI.Agents.Enem;
+using AI.Pipelines.Enem.Steps;
 using Domain.Agents.Enem;
-using Domain.Interfaces.Agents;
 using Domain.Interfaces.Context;
 using Domain.Interfaces.Pipelines.Enem;
+using Domain.Pipelines;
+using Domain.Pipelines.Steps;
 using Microsoft.Extensions.Logging;
 
 namespace AI.Pipelines.Enem;
 
-/// <summary>Pipeline: Validar → Logar → ExplainerAgent → Garantir resposta não vazia.</summary>
-internal sealed class ExplainTopicPipeline(
-    IAgent<ExplainRequest, string> agent,
-    IUserContext userContext,
-    ILogger<ExplainTopicPipeline> logger) : IExplainTopicPipeline
+/// <summary>Pipeline: Validar → Logar → ExplainerAgent → Validar saída.</summary>
+public sealed class ExplainTopicPipeline : Pipeline<ExplainRequest, string>, IExplainTopicPipeline
 {
-    public Task<string> RunAsync(ExplainRequest input, CancellationToken cancellationToken = default)
+    public ExplainTopicPipeline(
+        ExplainerAgent agent,
+        IUserContext userContext,
+        ILogger<ExplainTopicPipeline> logger) : base("ExplainTopic")
     {
         var sessionKey = $"enem:explain:{userContext.UserId}";
 
-        return Pipeline.Start<ExplainRequest>()
-            .Validate(r => !string.IsNullOrWhiteSpace(r.Topic), "Tópico é obrigatório.")
-            .Validate(r => r.Topic.Length <= 500, "Tópico não pode exceder 500 caracteres.")
-            .Tap(r => logger.LogInformation(
-                "[ExplainTopic] User={UserId} Topic={Topic}", userContext.UserId, r.Topic))
-            .ThenAgent(agent, sessionKey)
-            .Validate(s => !string.IsNullOrWhiteSpace(s), "Agente retornou resposta vazia.")
-            .Tap(s => logger.LogInformation(
-                "[ExplainTopic] Response length={Length} chars", s.Length))
-            .Build()
-            .RunAsync(input, cancellationToken);
+        AddStep(new ValidationStep<ExplainRequest>(
+                nameof(ExplainRequest.Topic),
+                r => !string.IsNullOrWhiteSpace(r.Topic),
+                "Tópico é obrigatório."))
+            .AddStep(new ValidationStep<ExplainRequest>(
+                nameof(ExplainRequest.Topic),
+                r => r.Topic.Length <= 500,
+                "Tópico não pode exceder 500 caracteres."))
+            .AddStep(new LoggingStep(
+                "LogInput", logger,
+                ctx => $"[ExplainTopic] User={userContext.UserId} Topic={((ExplainRequest)ctx.CurrentValue!).Topic}"))
+            .AddStep(new ExplainTopicStep(agent, sessionKey))
+            .AddStep(new ValidationStep<string>(
+                "Agent", s => !string.IsNullOrWhiteSpace(s),
+                "Agente retornou resposta vazia."));
     }
 }

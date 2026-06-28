@@ -1,37 +1,46 @@
-using AI.Pipelines.Builder;
+using AI.Agents.Enem;
+using AI.Pipelines.Enem.Steps;
 using Domain.Agents.Enem;
-using Domain.Interfaces.Agents;
 using Domain.Interfaces.Context;
 using Domain.Interfaces.Pipelines.Enem;
+using Domain.Pipelines;
+using Domain.Pipelines.Steps;
 using Microsoft.Extensions.Logging;
 
 namespace AI.Pipelines.Enem;
 
 /// <summary>
-/// Pipeline: Validar → Logar → QuestionAgent (sessão por usuário) → Verificar saída.
+/// Pipeline: Validar → Logar → QuestionAgent → Validar saída.
+/// 100% POO — composta no construtor adicionando steps em sequência.
 /// </summary>
-internal sealed class GenerateQuestionPipeline(
-    IAgent<QuestionRequest, EnemQuestion> agent,
-    IUserContext userContext,
-    ILogger<GenerateQuestionPipeline> logger) : IGenerateQuestionPipeline
+public sealed class GenerateQuestionPipeline : Pipeline<QuestionRequest, EnemQuestion>, IGenerateQuestionPipeline
 {
-    public Task<EnemQuestion> RunAsync(QuestionRequest input, CancellationToken cancellationToken = default)
+    public GenerateQuestionPipeline(
+        QuestionAgent agent,
+        IUserContext userContext,
+        ILogger<GenerateQuestionPipeline> logger) : base("GenerateQuestion")
     {
         var sessionKey = $"enem:question:{userContext.UserId}";
 
-        return Pipeline.Start<QuestionRequest>()
-            .Validate(r => !string.IsNullOrWhiteSpace(r.Topic), "Tópico é obrigatório.")
-            .Validate(r => !string.IsNullOrWhiteSpace(r.Area), "Área é obrigatória.")
-            .Tap(r => logger.LogInformation(
-                "[GenerateQuestion] User={UserId} Topic={Topic} Area={Area}",
-                userContext.UserId, r.Topic, r.Area))
-            .ThenAgent(agent, sessionKey)
-            .Validate(q => !string.IsNullOrWhiteSpace(q.Statement), "Agente retornou questão sem enunciado.")
-            .Validate(q => q.Options.Count >= 2, "Questão deve ter pelo menos 2 alternativas.")
-            .Tap(q => logger.LogInformation(
-                "[GenerateQuestion] Generated {Options} options for {Area}",
-                q.Options.Count, q.Area))
-            .Build()
-            .RunAsync(input, cancellationToken);
+        AddStep(new ValidationStep<QuestionRequest>(
+                nameof(QuestionRequest.Topic),
+                r => !string.IsNullOrWhiteSpace(r.Topic),
+                "Tópico é obrigatório."))
+            .AddStep(new ValidationStep<QuestionRequest>(
+                nameof(QuestionRequest.Area),
+                r => !string.IsNullOrWhiteSpace(r.Area),
+                "Área é obrigatória."))
+            .AddStep(new LoggingStep(
+                "LogInput", logger,
+                ctx => $"[GenerateQuestion] User={userContext.UserId} Input={ctx.CurrentValue}"))
+            .AddStep(new GenerateQuestionStep(agent, sessionKey))
+            .AddStep(new ValidationStep<EnemQuestion>(
+                nameof(EnemQuestion.Statement),
+                q => !string.IsNullOrWhiteSpace(q.Statement),
+                "Agente retornou questão sem enunciado."))
+            .AddStep(new ValidationStep<EnemQuestion>(
+                nameof(EnemQuestion.Options),
+                q => q.Options.Count >= 2,
+                "Questão deve ter pelo menos 2 alternativas."));
     }
 }

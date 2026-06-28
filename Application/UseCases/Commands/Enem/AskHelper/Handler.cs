@@ -1,4 +1,3 @@
-using Domain.Exceptions;
 using Domain.Interfaces.Pipelines.Enem;
 using MediatR;
 
@@ -9,14 +8,14 @@ internal sealed class Handler(IAskHelperPipeline pipeline)
 {
     public async Task<Response> Handle(Request request, CancellationToken cancellationToken)
     {
-        try
-        {
-            var answer = await pipeline.RunAsync(request.Question, cancellationToken);
-            return new Response(StatusCode: 200, Answer: answer);
-        }
-        catch (PipelineValidationException ex)
-        {
-            return new Response(StatusCode: 400, Message: ex.Message);
-        }
+        var result = await pipeline.RunAsync(request.Question, cancellationToken);
+
+        if (!result.IsValid)
+            return new Response(
+                StatusCode: 400,
+                Message: string.Join("; ", result.Notifications.Select(n => n.Message)),
+                Notifications: result.Notifications.ToList());
+
+        return new Response(StatusCode: 200, Answer: result.Value);
     }
 }

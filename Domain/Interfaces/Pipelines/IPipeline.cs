@@ -1,15 +1,17 @@
+using Domain.Pipelines;
+
 namespace Domain.Interfaces.Pipelines;
 
 /// <summary>
-/// Pipeline tipado que recebe <typeparamref name="TIn"/> e produz <typeparamref name="TOut"/>.
-/// Implementação concreta vive na camada AI (composto via PipelineBuilder em estilo LangChain).
+/// Contrato mínimo de uma Pipeline tipada. Implementado por <c>Pipeline&lt;TIn,TOut&gt;</c>
+/// (em <c>Domain.Pipelines</c>) e pelas pipelines concretas (ex: <c>GenerateQuestionPipeline</c>).
 /// </summary>
 public interface IPipeline<in TIn, TOut>
 {
-    Task<TOut> RunAsync(TIn input, CancellationToken cancellationToken = default);
+    Task<PipelineResult<TOut>> RunAsync(TIn input, CancellationToken cancellationToken = default);
 }
 
-/// <summary>Pipeline que produz resposta em streaming (texto incremental).</summary>
+/// <summary>Pipeline que produz resposta em streaming (texto incremental, SSE).</summary>
 public interface IStreamingPipeline<in TIn>
 {
     IAsyncEnumerable<string> RunStreamingAsync(TIn input, CancellationToken cancellationToken = default);

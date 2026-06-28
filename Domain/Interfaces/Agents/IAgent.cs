@@ -1,29 +1,55 @@
+using Domain.Agents;
+using Domain.Agents.ValueObjects;
+using Domain.Capabilities;
+using Domain.Pipelines;
+
 namespace Domain.Interfaces.Agents;
 
 /// <summary>
-/// Contrato base para todos os agentes do sistema.
-///   TIn  = tipo da entrada (string, command, DTO, etc.)
-///   TOut = tipo da saída  (string, result, DTO, etc.)
-///
-/// <paramref name="sessionKey"/> é opcional — quando informado, o agente
-/// hidrata e persiste o histórico da conversa via cache distribuído.
+/// Contrato de domínio do Agent. AgentBase (camada AI) implementa esta interface
+/// e também herda do <c>ChatClientAgent</c> do MAF — então pode ser invocado tanto
+/// pela API alto-nível desta interface quanto pelos métodos nativos do framework.
 /// </summary>
-public interface IAgent<TIn, TOut>
+public interface IAgent : IAgentAware
 {
-    Task<TOut> RunAsync(
-        TIn input,
-        string? sessionKey = null,
+    /// <summary>
+    /// Invoca o agente com um prompt textual. Retorna a resposta com métricas
+    /// (tokens, latência). Suporta sessão (histórico) e capabilities de runtime.
+    /// </summary>
+    Task<AgentInvocationResult> InvokeAsync(
+        AgentInvocationInput input,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>Invocação em streaming — yield de chunks de texto conforme chegam do LLM.</summary>
+    IAsyncEnumerable<string> InvokeStreamingAsync(
+        AgentInvocationInput input,
         CancellationToken cancellationToken = default);
 }
 
 /// <summary>
-/// Contrato para agentes que suportam resposta em streaming (texto incremental).
-/// Útil em UIs de chat e geração de conteúdo longo.
+/// Auto-consciência do Agent: identidade, papel, status, capabilities permanentes
+/// e métricas acumuladas. Permite à Pipeline e à camada Application inspecionar
+/// o estado de qualquer Agent sem depender da implementação.
 /// </summary>
-public interface IStreamingAgent<TIn>
+public interface IAgentAware
 {
-    IAsyncEnumerable<string> RunStreamingAsync(
-        TIn input,
-        string? sessionKey = null,
-        CancellationToken cancellationToken = default);
+    AgentId AgentId { get; }
+    AgentName AgentName { get; }
+    AgentRole Role { get; }
+    AgentStatus Status { get; }
+    AgentCapabilities Capabilities { get; }
+    AgentMetrics Metrics { get; }
 }
+
+/// <summary>Input de uma invocação ao agent.</summary>
+public sealed record AgentInvocationInput(
+    string Prompt,
+    string? SessionKey = null,
+    IReadOnlyList<PluginDescriptor>? RuntimePlugins = null,
+    IReadOnlyList<McpDescriptor>? RuntimeMcps = null);
+
+/// <summary>Saída de uma invocação ao agent.</summary>
+public sealed record AgentInvocationResult(
+    string Text,
+    TokenUsage Tokens,
+    TimeSpan Latency);
