@@ -9,7 +9,7 @@ namespace Domain.Sessions;
 /// memória de conversa. Esta é a contraparte de domínio do <c>AgentSession</c>
 /// nativo do MAF, mantida pura (sem referência ao framework).
 /// </summary>
-public class AgentSession : Notifiable<Notification>
+internal class AgentSession : Notifiable<Notification>
 {
     public SessionId Id { get; private set; } = default!;
     public AgentId AgentId { get; private set; } = default!;

@@ -6,7 +6,7 @@ namespace Domain.Pipelines;
 /// Resultado tipado da execução de uma <see cref="Pipeline{TIn,TOut}"/>.
 /// Acumula notificações em vez de lançar — quem chamou decide o que fazer.
 /// </summary>
-public sealed class PipelineResult<TValue> : Notifiable<Notification>
+internal sealed class PipelineResult<TValue> : Notifiable<Notification>
 {
     public TValue? Value { get; }
     public PipelineMetrics Metrics { get; }
@@ -29,14 +29,14 @@ public sealed class PipelineResult<TValue> : Notifiable<Notification>
         PipelineId = pipelineId;
     }
 
-    public static PipelineResult<TValue> Success(TValue value, PipelineMetrics metrics, PipelineId id) =>
+    internal static PipelineResult<TValue> Success(TValue value, PipelineMetrics metrics, PipelineId id) =>
         new(value, metrics, id);
 
-    public static PipelineResult<TValue> Fail(
+    internal static PipelineResult<TValue> Fail(
         IReadOnlyCollection<Notification> notifications, PipelineMetrics metrics, PipelineId id) =>
         new(notifications, metrics, id);
 
-    public static PipelineResult<TValue> Fail(string property, string message, PipelineMetrics metrics, PipelineId id) =>
+    internal static PipelineResult<TValue> Fail(string property, string message, PipelineMetrics metrics, PipelineId id) =>
         new([new Notification(property, message)], metrics, id);
 }
 
@@ -64,10 +64,10 @@ internal sealed class PipelineResult : Notifiable<Notification>
         PipelineId = id;
     }
 
-    public static PipelineResult Success(object? value, PipelineMetrics metrics, PipelineId id) =>
+    internal static PipelineResult Success(object? value, PipelineMetrics metrics, PipelineId id) =>
         new(value, metrics, id);
 
-    public static PipelineResult Fail(
+    internal static PipelineResult Fail(
         IReadOnlyCollection<Notification> notifications, PipelineMetrics metrics, PipelineId id) =>
         new(notifications, metrics, id);
 }

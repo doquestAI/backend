@@ -7,7 +7,7 @@ namespace Domain.Agents;
 /// Cada invocação contribui para <see cref="TotalTokens"/>, <see cref="TotalLatency"/>
 /// e <see cref="TotalInvocations"/>. Atualizada pelo próprio Agent após cada chamada.
 /// </summary>
-public sealed class AgentMetrics
+internal sealed class AgentMetrics
 {
     public int TotalInvocations { get; private set; }
     public TokenUsage TotalTokens { get; private set; } = TokenUsage.Empty;

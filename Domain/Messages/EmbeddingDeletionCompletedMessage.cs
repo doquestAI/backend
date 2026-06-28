@@ -1,6 +1,6 @@
 namespace Domain.Messages;
 
-public record EmbeddingDeletionCompletedMessage(
+internal record EmbeddingDeletionCompletedMessage(
     Guid DocumentId,
     DateTime DeletedAt,
     int EmbeddingsDeleted,

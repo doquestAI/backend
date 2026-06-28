@@ -1,7 +1,7 @@
 namespace Domain.Pipelines;
 
 /// <summary>Métricas observáveis de um único <see cref="PipelineStep"/>.</summary>
-public sealed class StepMetrics
+internal sealed class StepMetrics
 {
     public TokenUsage Tokens { get; }
     public TimeSpan Duration { get; }
@@ -23,6 +23,6 @@ public sealed class StepMetrics
         FinishedAt = finishedAt;
     }
 
-    public static StepMetrics Empty(DateTime at) =>
+    internal static StepMetrics Empty(DateTime at) =>
         new(TokenUsage.Empty, TimeSpan.Zero, 0, at, at);
 }

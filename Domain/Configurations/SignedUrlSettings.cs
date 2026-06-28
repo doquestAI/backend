@@ -1,6 +1,6 @@
 namespace Domain.Configurations;
 
-public class SignedUrlSettings
+internal class SignedUrlSettings
 {
     public int IntervalMinutes { get; set; } = 5;
     public int BatchSize { get; set; } = 100;

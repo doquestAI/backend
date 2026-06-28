@@ -11,7 +11,7 @@ namespace Domain.Pipelines.Steps;
 /// Captura tokens consumidos via <see cref="AgentInvocationResult.Tokens"/> e
 /// atribui à <see cref="PipelineMetrics"/> por nome de agent.
 /// </summary>
-public abstract class AgentStep : PipelineStep
+internal abstract class AgentStep : PipelineStep
 {
     protected IAgent Agent { get; }
     protected string? SessionKey { get; }
@@ -58,7 +58,7 @@ public abstract class AgentStep : PipelineStep
 /// AgentStep simples: pega o valor corrente (string) e devolve o texto cru do LLM.
 /// Use para o caso trivial input texto → output texto sem parsing.
 /// </summary>
-public sealed class TextAgentStep : AgentStep
+internal sealed class TextAgentStep : AgentStep
 {
     public TextAgentStep(IAgent agent, string? sessionKey = null)
         : base(agent, sessionKey) { }

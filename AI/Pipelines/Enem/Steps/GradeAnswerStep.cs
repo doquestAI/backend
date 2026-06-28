@@ -8,7 +8,7 @@ namespace AI.Pipelines.Enem.Steps;
 /// Step que recebe um <see cref="FeedbackRequest"/> e devolve um <see cref="FeedbackResult"/>
 /// com correção, explicação e nota normalizada (0..1).
 /// </summary>
-public sealed class GradeAnswerStep(IAgent agent, string? sessionKey = null)
+internal sealed class GradeAnswerStep(IAgent agent, string? sessionKey = null)
     : AgentStep(agent, sessionKey, name: "GradeAnswer")
 {
     protected override string FormatPrompt(object? currentValue)

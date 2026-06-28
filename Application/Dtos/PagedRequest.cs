@@ -3,7 +3,7 @@ using MediatR;
 
 namespace Application.Dtos;
 
-public abstract record PaginatedRequest<TResponse> : IRequest<TResponse>
+internal abstract record PaginatedRequest<TResponse> : IRequest<TResponse>
 {
     public int PageNumber { get; init; } = 1;
     public int PageSize { get; init; } = 10;

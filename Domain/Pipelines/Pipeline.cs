@@ -21,7 +21,7 @@ namespace Domain.Pipelines;
 /// Emite spans OTel via <see cref="PipelineTelemetry.Source"/> e métricas via
 /// <see cref="PipelineTelemetry"/>. Não há dependência de NuGet — usa apenas BCL.
 /// </summary>
-public class Pipeline<TIn, TOut> : IPipeline<TIn, TOut>
+internal class Pipeline<TIn, TOut> : IPipeline<TIn, TOut>
 {
     public PipelineId Id { get; }
     public PipelineName Name { get; protected set; }

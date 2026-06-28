@@ -4,7 +4,7 @@ namespace Domain.Pipelines;
 /// Representa UMA execução concreta de uma Pipeline. Vive enquanto a Pipeline roda,
 /// rastreia o step corrente e os tempos. Snapshot para observabilidade externa.
 /// </summary>
-public sealed class PipelineExecution
+internal sealed class PipelineExecution
 {
     public PipelineId PipelineId { get; }
     public DateTime StartedAt { get; }

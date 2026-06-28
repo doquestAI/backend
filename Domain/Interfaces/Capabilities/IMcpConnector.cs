@@ -7,7 +7,7 @@ namespace Domain.Interfaces.Capabilities;
 /// sem conhecer transporte (StdIo, SSE, HTTP). A implementação concreta seleciona
 /// o registry correto (<c>StdIoMcpRegistry</c>, <c>SseMcpRegistry</c>) na camada AI.
 /// </summary>
-public interface IMcpConnector
+internal interface IMcpConnector
 {
     Task RegisterAsync(McpDescriptor descriptor, CancellationToken ct = default);
 

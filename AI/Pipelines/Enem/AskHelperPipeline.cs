@@ -14,7 +14,7 @@ namespace AI.Pipelines.Enem;
 /// Suporta também streaming (SSE) — bypassa a iteração de steps pois precisa preservar
 /// o <see cref="IAsyncEnumerable{T}"/> ao longo do caminho.
 /// </summary>
-public sealed class AskHelperPipeline : Pipeline<string, string>, IAskHelperPipeline
+internal sealed class AskHelperPipeline : Pipeline<string, string>, IAskHelperPipeline
 {
     private readonly HelperEnemAgent _agent;
     private readonly IUserContext _userContext;

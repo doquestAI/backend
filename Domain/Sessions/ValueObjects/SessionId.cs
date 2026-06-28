@@ -3,7 +3,7 @@ using Flunt.Validations;
 
 namespace Domain.Sessions.ValueObjects;
 
-public sealed class SessionId : ValueObject
+internal sealed class SessionId : ValueObject
 {
     public string Value { get; private set; } = string.Empty;
 
@@ -21,7 +21,7 @@ public sealed class SessionId : ValueObject
             Value = value!;
     }
 
-    public static SessionId New() => new(Guid.NewGuid().ToString("N"));
+    internal static SessionId New() => new(Guid.NewGuid().ToString("N"));
 
     public override string ToString() => Value;
 }

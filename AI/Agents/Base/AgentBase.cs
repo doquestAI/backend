@@ -1,3 +1,4 @@
+using AI.Common;
 using AI.Common.Config;
 using AI.Observability;
 using AI.Providers.Session;
@@ -35,7 +36,7 @@ namespace AI.Agents.Base;
 /// métricas de tokens/latência em <see cref="AgentTelemetry"/>.
 /// </para>
 /// </summary>
-public abstract class AgentBase : DelegatingAIAgent, IAgent
+internal abstract class AgentBase : DelegatingAIAgent, IAgent
 {
     public AgentId AgentId { get; }
     public AgentName AgentName { get; }
@@ -44,13 +45,13 @@ public abstract class AgentBase : DelegatingAIAgent, IAgent
     public AgentCapabilities Capabilities { get; }
     public AgentMetrics Metrics { get; } = new();
 
-    private readonly AgentSessionCache _sessionCache;
+    private readonly AgentSessionStore _sessionStore;
     private readonly ILogger _logger;
 
     protected AgentBase(
         IChatClient chatClient,
         AgentConfig config,
-        AgentSessionCache sessionCache,
+        AgentSessionStore sessionStore,
         ILoggerFactory loggerFactory)
         : base(new ChatClientAgent(chatClient, BuildOptions(config), loggerFactory))
     {
@@ -58,7 +59,7 @@ public abstract class AgentBase : DelegatingAIAgent, IAgent
         AgentName = new AgentName(config.Name);
         Role = config.Role;
         Capabilities = config.Capabilities ?? AgentCapabilities.Default();
-        _sessionCache = sessionCache;
+        _sessionStore = sessionStore;
         _logger = loggerFactory.CreateLogger(GetType());
     }
 
@@ -89,14 +90,16 @@ public abstract class AgentBase : DelegatingAIAgent, IAgent
 
         try
         {
+            AgentInvocationScope.UseRag = input.UseRag;
+
             AgentSession? session = input.SessionKey is null
                 ? null
-                : await _sessionCache.LoadOrCreateAsync(this, input.SessionKey, cancellationToken);
+                : await _sessionStore.LoadOrCreateAsync(this, input.SessionKey, cancellationToken);
 
             var response = await RunAsync(input.Prompt, session, cancellationToken: cancellationToken);
 
             if (session is not null && input.SessionKey is not null)
-                await _sessionCache.SaveAsync(this, session, input.SessionKey, cancellationToken);
+                await _sessionStore.SaveAsync(this, session, input.SessionKey, AgentName.Value ?? string.Empty, cancellationToken);
 
             sw.Stop();
             var tokens = ExtractTokens(response);
@@ -125,8 +128,8 @@ public abstract class AgentBase : DelegatingAIAgent, IAgent
             activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
             activity?.AddEvent(new ActivityEvent("exception", tags: new ActivityTagsCollection
             {
-                ["exception.type"]       = ex.GetType().FullName,
-                ["exception.message"]    = ex.Message,
+                ["exception.type"] = ex.GetType().FullName,
+                ["exception.message"] = ex.Message,
                 ["exception.stacktrace"] = ex.ToString()
             }));
 
@@ -168,7 +171,7 @@ public abstract class AgentBase : DelegatingAIAgent, IAgent
 
         AgentSession? session = input.SessionKey is null
             ? null
-            : await _sessionCache.LoadOrCreateAsync(this, input.SessionKey, cancellationToken);
+            : await _sessionStore.LoadOrCreateAsync(this, input.SessionKey, cancellationToken);
 
         await foreach (var update in RunStreamingAsync(
             input.Prompt, session, cancellationToken: cancellationToken))
@@ -178,7 +181,7 @@ public abstract class AgentBase : DelegatingAIAgent, IAgent
         }
 
         if (session is not null && input.SessionKey is not null)
-            await _sessionCache.SaveAsync(this, session, input.SessionKey, cancellationToken);
+            await _sessionStore.SaveAsync(this, session, input.SessionKey, AgentName.Value ?? string.Empty, cancellationToken);
 
         sw.Stop();
         Metrics.RecordInvocation(TokenUsage.Empty, sw.Elapsed);
@@ -214,7 +217,8 @@ public abstract class AgentBase : DelegatingAIAgent, IAgent
     private static TokenUsage ExtractTokens(AgentResponse response)
     {
         var usage = response.Usage;
-        if (usage is null) return TokenUsage.Empty;
+        if (usage is null)
+            return TokenUsage.Empty;
         return new TokenUsage(
             usage.InputTokenCount ?? 0,
             usage.OutputTokenCount ?? 0);

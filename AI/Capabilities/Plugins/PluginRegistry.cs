@@ -10,7 +10,7 @@ namespace AI.Capabilities.Plugins;
 /// no Agent. Para MAF, plugins são apenas agrupamentos lógicos de Function Tools criadas
 /// via <c>AIFunctionFactory.Create(...)</c>.
 /// </summary>
-public sealed class PluginRegistry : IPluginRegistry, IPluginRegistrar
+internal sealed class PluginRegistry : IPluginRegistry, IPluginRegistrar
 {
     private readonly ConcurrentDictionary<string, PluginEntry> _plugins = new();
 

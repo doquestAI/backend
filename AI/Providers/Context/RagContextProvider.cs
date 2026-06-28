@@ -1,3 +1,4 @@
+using AI.Common;
 using Domain.Interfaces.Vector;
 using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
@@ -16,7 +17,7 @@ namespace AI.Providers.Context;
 ///
 /// Substitui o método hardcoded <c>RetrieveRagContextAsync</c> do antigo <c>AgentBase</c>.
 /// </summary>
-public sealed class RagContextProvider(
+internal sealed class RagContextProvider(
     IEmbeddingGenerator<string, Embedding<float>> embeddingGenerator,
     IVectorStore vectorStore,
     string collection,
@@ -29,6 +30,9 @@ public sealed class RagContextProvider(
         InvokingContext context,
         CancellationToken cancellationToken = default)
     {
+        if (!AgentInvocationScope.UseRag)
+            return new AIContext();
+
         var queryText = ExtractLastUserText(context.AIContext.Messages);
         if (string.IsNullOrWhiteSpace(queryText))
             return new AIContext();

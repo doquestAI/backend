@@ -1,4 +1,3 @@
-using AI.Capabilities.Mcp;
 using AI.Capabilities.Plugins;
 using Domain.Capabilities;
 using Domain.Interfaces.Capabilities;
@@ -10,7 +9,7 @@ namespace AI.Capabilities;
 /// <see cref="PluginRegistry"/> + MCPs do <see cref="IMcpConnector"/> em uma
 /// visão consolidada para uso pelo Application.
 /// </summary>
-public sealed class CapabilitiesProvider(
+internal sealed class CapabilitiesProvider(
     PluginRegistry pluginRegistry,
     IMcpConnector mcpConnector) : ICapabilitiesProvider
 {

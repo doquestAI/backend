@@ -2,7 +2,7 @@ using Domain.Messages;
 
 namespace Domain.Interfaces.Handlers;
 
-public interface IEmbeddingDeletionCompletedHandler
+internal interface IEmbeddingDeletionCompletedHandler
 {
     Task ExecuteAsync(EmbeddingDeletionCompletedMessage message, CancellationToken cancellationToken);
 }

@@ -4,7 +4,7 @@ namespace Domain.Capabilities;
 /// Descreve um plugin disponível para o Agent.
 /// Não conhece como o plugin é executado — apenas o que ele é.
 /// </summary>
-public sealed class PluginDescriptor
+internal sealed class PluginDescriptor
 {
     public required string Name { get; init; }
     public required string Description { get; init; }

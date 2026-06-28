@@ -3,7 +3,7 @@ using Flunt.Validations;
 
 namespace Domain.Agents.ValueObjects;
 
-public sealed class AgentName : ValueObject
+internal sealed class AgentName : ValueObject
 {
     public string? Value { get; private set; }
 

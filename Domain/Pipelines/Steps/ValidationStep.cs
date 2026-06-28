@@ -4,7 +4,7 @@ namespace Domain.Pipelines.Steps;
 /// Step que valida o valor corrente da pipeline. Falha = notificação,
 /// curto-circuita os steps seguintes. Não consome tokens.
 /// </summary>
-public sealed class ValidationStep : PipelineStep
+internal sealed class ValidationStep : PipelineStep
 {
     private readonly Func<object?, bool> _predicate;
     private readonly string _property;
@@ -32,7 +32,7 @@ public sealed class ValidationStep : PipelineStep
 }
 
 /// <summary>Versão tipada — recebe e valida o valor já convertido para <typeparamref name="T"/>.</summary>
-public sealed class ValidationStep<T> : PipelineStep
+internal sealed class ValidationStep<T> : PipelineStep
 {
     private readonly Func<T, bool> _predicate;
     private readonly string _property;

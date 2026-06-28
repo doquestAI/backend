@@ -7,7 +7,7 @@ namespace AI.Pipelines.Enem.Steps;
 /// <summary>
 /// Step que recebe um <see cref="ExplainRequest"/> e devolve a explicação como string.
 /// </summary>
-public sealed class ExplainTopicStep(IAgent agent, string? sessionKey = null)
+internal sealed class ExplainTopicStep(IAgent agent, string? sessionKey = null)
     : AgentStep(agent, sessionKey, name: "ExplainTopic")
 {
     protected override string FormatPrompt(object? currentValue)

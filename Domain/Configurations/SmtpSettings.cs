@@ -1,6 +1,6 @@
 namespace Domain.Configurations;
 
-public class SmtpSettings
+internal class SmtpSettings
 {
     public string Server { get; set; } = string.Empty;
     public int Port { get; set; } = 587;

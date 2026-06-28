@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 namespace AI.Agents.Enem;
 
 /// <summary>Responde dúvidas gerais sobre o ENEM. Texto livre, suporta streaming.</summary>
-public sealed class HelperEnemAgent(
+internal sealed class HelperEnemAgent(
     IChatClient client,
     [FromKeyedServices(AgentKeys.Helper)] AgentConfig config,
     AgentSessionCache sessionCache,

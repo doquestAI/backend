@@ -6,7 +6,7 @@ namespace Domain.Pipelines;
 /// Resultado da execução de um único <see cref="PipelineStep"/>.
 /// Falhas viram notificações (não exceptions). Métricas sempre presentes.
 /// </summary>
-public sealed class StepResult : Notifiable<Notification>
+internal sealed class StepResult : Notifiable<Notification>
 {
     public object? Value { get; }
     public StepMetrics Metrics { get; }
@@ -23,12 +23,12 @@ public sealed class StepResult : Notifiable<Notification>
         Metrics = metrics;
     }
 
-    public static StepResult Success(object? value, StepMetrics metrics) =>
+    internal static StepResult Success(object? value, StepMetrics metrics) =>
         new(value, metrics);
 
-    public static StepResult Fail(string property, string message, StepMetrics metrics) =>
+    internal static StepResult Fail(string property, string message, StepMetrics metrics) =>
         new([new Notification(property, message)], metrics);
 
-    public static StepResult Fail(IReadOnlyCollection<Notification> notifications, StepMetrics metrics) =>
+    internal static StepResult Fail(IReadOnlyCollection<Notification> notifications, StepMetrics metrics) =>
         new(notifications, metrics);
 }

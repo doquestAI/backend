@@ -15,7 +15,7 @@ namespace AI.Providers.Context;
 ///
 /// Substitui <c>DistributedCacheAgentMemory</c> + bloco hardcoded de memória em <c>AgentBase</c>.
 /// </summary>
-public sealed class DistributedCacheMemoryProvider(
+internal sealed class DistributedCacheMemoryProvider(
     IDistributedCache cache,
     string memoryNamespace,
     ILogger<DistributedCacheMemoryProvider> logger,

@@ -3,6 +3,7 @@ using Azure.Messaging.ServiceBus;
 using Domain.Configurations;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services;
+using Domain.Interfaces.Vector;
 using EFCoreSecondLevelCacheInterceptor;
 using Infrastructure.Cache;
 using Infrastructure.Data;
@@ -12,6 +13,7 @@ using Infrastructure.Services.Azure.BlobStorage;
 using Infrastructure.Services.Azure.ServiceBus.Publishers;
 using Infrastructure.Services.Azure.ServiceBus.Subscribers;
 using Infrastructure.Services.Azure.ServiceBus.Subscribers.Factories;
+using Infrastructure.Vector;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -39,6 +41,7 @@ internal static class InfrastructureServicesExtensions
         internal void ConfigureInfrastructureServices()
         {
             services.AddMemoryCache();
+            services.AddDistributedMemoryCache();
             services.AddScoped<IDbCommit, DbCommit>()
                 .AddScoped<IMessagePublisher, ServiceBusMessagePublisher>()
                 .AddScoped<ITemporaryStorageService, TemporaryStorageService>()
@@ -48,7 +51,9 @@ internal static class InfrastructureServicesExtensions
                 .AddScoped<IDocumentRepository, DocumentRepository>()
                 .AddScoped<IAccountSubscriptionRepository, AccountSubscriptionRepository>()
                 .AddScoped<IIdentityProviderService, EntraIdentityProviderService>()
-                .AddScoped<IStripeWebhookService, StripeWebhookService>();
+                .AddScoped<IStripeWebhookService, StripeWebhookService>()
+                .AddScoped<IAgentSessionRepository, AgentSessionRepository>()
+                .AddScoped<IVectorStore, PgVectorStore>();
 
             services.AddSingleton<GraphServiceClient>(provider =>
             {
@@ -92,7 +97,9 @@ internal static class InfrastructureServicesExtensions
                 {
                     var settings = serviceProvider.GetRequiredService<IOptions<DatabaseSettings>>().Value;
                     optionsBuilder
-                        .UseNpgsql(BuildConnectionStringFromSettings(settings))
+                        .UseNpgsql(
+                            BuildConnectionStringFromSettings(settings),
+                            o => o.UseVector())
                         .AddInterceptors(serviceProvider.GetRequiredService<SecondLevelCacheInterceptor>());
                 });
         }

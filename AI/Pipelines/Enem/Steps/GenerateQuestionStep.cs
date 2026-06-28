@@ -9,7 +9,7 @@ namespace AI.Pipelines.Enem.Steps;
 /// Step que recebe um <see cref="QuestionRequest"/>, monta o prompt para o agente
 /// e parseia o XML da resposta em <see cref="EnemQuestion"/>.
 /// </summary>
-public sealed partial class GenerateQuestionStep(IAgent agent, string? sessionKey = null)
+internal sealed partial class GenerateQuestionStep(IAgent agent, string? sessionKey = null)
     : AgentStep(agent, sessionKey, name: "GenerateQuestion")
 {
     protected override string FormatPrompt(object? currentValue)
@@ -39,7 +39,8 @@ public sealed partial class GenerateQuestionStep(IAgent agent, string? sessionKe
     private static IReadOnlyList<string> ExtractOptions(string text)
     {
         var match = OptionsRegex().Match(text);
-        if (!match.Success) return [];
+        if (!match.Success)
+            return [];
 
         return match.Groups[1].Value
             .Split('\n', StringSplitOptions.RemoveEmptyEntries)

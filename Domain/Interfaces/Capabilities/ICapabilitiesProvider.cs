@@ -6,7 +6,7 @@ namespace Domain.Interfaces.Capabilities;
 /// Visão agregada das capabilities (plugins + MCPs + functions) disponíveis ao Agent.
 /// Implementado na AI por <c>CapabilitiesProvider</c>.
 /// </summary>
-public interface ICapabilitiesProvider
+internal interface ICapabilitiesProvider
 {
     IReadOnlyList<PluginDescriptor> GetPlugins();
     Task<IReadOnlyList<McpDescriptor>> GetMcpsAsync(CancellationToken ct = default);

@@ -1,6 +1,6 @@
 namespace Domain.Messages;
 
-public record EmbeddingDeletionRequestMessage(
+internal record EmbeddingDeletionRequestMessage(
     Guid DocumentId,
     DateTime RequestedAt,
     Guid RequestedBy);

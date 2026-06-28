@@ -1,6 +1,6 @@
 namespace Domain.Messages;
 
-public record DocumentEmbeddingMessage(
+internal record DocumentEmbeddingMessage(
     Guid DocumentId,
     string CloudStorageKey,
     string ContainerName,

@@ -6,7 +6,7 @@ internal static class QueryCacheExtensions
 {
     private const string NoCacheTag = "__NOCACHE__";
 
-    public static IQueryable<T> NoCache<T>(this IQueryable<T> query) where T : class
+    internal static IQueryable<T> NoCache<T>(this IQueryable<T> query) where T : class
     {
         return query.TagWith(NoCacheTag);
     }

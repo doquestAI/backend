@@ -2,7 +2,7 @@ using MediatR;
 
 namespace Application.UseCases.Commands.Enem.GradeAnswer;
 
-public record Request(
+internal record Request(
     string Question,
     string StudentAnswer,
     string CorrectAnswer,

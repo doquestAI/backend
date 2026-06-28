@@ -16,7 +16,6 @@ internal static class AgentTelemetry
     private static readonly Meter _meter =
         new(TelemetryConstants.Meters.Agent, "1.0.0");
 
-    // ── Contadores ──────────────────────────────────────────────────────
     internal static readonly Counter<long> Invocations =
         _meter.CreateCounter<long>(
             "gen_ai.agent.invocations",
@@ -41,7 +40,6 @@ internal static class AgentTelemetry
             unit: "{tokens}",
             description: "Total de tokens de saída produzidos pelos agents.");
 
-    // ── Histograma de latência ──────────────────────────────────────────
     internal static readonly Histogram<double> InvocationDuration =
         _meter.CreateHistogram<double>(
             "gen_ai.agent.duration",

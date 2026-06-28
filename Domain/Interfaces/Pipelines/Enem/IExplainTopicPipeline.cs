@@ -2,4 +2,4 @@ using Domain.Agents.Enem;
 
 namespace Domain.Interfaces.Pipelines.Enem;
 
-public interface IExplainTopicPipeline : IPipeline<ExplainRequest, string>;
+internal interface IExplainTopicPipeline : IPipeline<ExplainRequest, string>;

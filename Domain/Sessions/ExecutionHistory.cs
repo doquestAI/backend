@@ -7,7 +7,7 @@ namespace Domain.Sessions;
 /// Distinto de <see cref="ConversationMemory"/> — aqui são <i>eventos de execução</i>,
 /// não mensagens trocadas com o LLM.
 /// </summary>
-public sealed class ExecutionHistory : Notifiable<Notification>
+internal sealed class ExecutionHistory : Notifiable<Notification>
 {
     private readonly List<ExecutionEvent> _events = [];
 
@@ -24,4 +24,4 @@ public sealed class ExecutionHistory : Notifiable<Notification>
     }
 }
 
-public sealed record ExecutionEvent(string StepName, string? Detail, DateTime Timestamp);
+internal sealed record ExecutionEvent(string StepName, string? Detail, DateTime Timestamp);

@@ -8,7 +8,7 @@ namespace Domain.Capabilities.ValueObjects;
 /// + argumentos (ex: <c>npx -y @modelcontextprotocol/server-github</c>);
 /// para Sse/Http é uma URL válida.
 /// </summary>
-public sealed class McpEndpoint : ValueObject
+internal sealed class McpEndpoint : ValueObject
 {
     public string Value { get; private set; } = string.Empty;
     public McpTransport Transport { get; private set; }

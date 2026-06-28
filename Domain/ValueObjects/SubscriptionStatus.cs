@@ -4,10 +4,10 @@ namespace Domain.ValueObjects;
 
 internal sealed class SubscriptionStatus : BaseValueObject
 {
-    public static readonly string Active = "active";
-    public static readonly string Cancelled = "cancelled";
-    public static readonly string Paused = "paused";
-    public static readonly string PastDue = "past_due";
+    internal static readonly string Active = "active";
+    internal static readonly string Cancelled = "cancelled";
+    internal static readonly string Paused = "paused";
+    internal static readonly string PastDue = "past_due";
 
     private static readonly string[] AllowedValues = ["active", "cancelled", "paused", "past_due"];
 

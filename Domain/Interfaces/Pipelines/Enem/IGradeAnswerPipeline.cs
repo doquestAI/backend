@@ -2,4 +2,4 @@ using Domain.Agents.Enem;
 
 namespace Domain.Interfaces.Pipelines.Enem;
 
-public interface IGradeAnswerPipeline : IPipeline<FeedbackRequest, FeedbackResult>;
+internal interface IGradeAnswerPipeline : IPipeline<FeedbackRequest, FeedbackResult>;

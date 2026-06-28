@@ -1,6 +1,6 @@
 namespace Domain.Interfaces.Services;
 
-public interface IMessagePublisher
+internal interface IMessagePublisher
 {
     Task PublishAsync<TMessage>(
         string topicName,

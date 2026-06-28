@@ -6,7 +6,7 @@ namespace Domain.Pipelines;
 /// Métricas agregadas da Pipeline inteira. Acumula contagem de tokens, latência e número
 /// de chamadas ao LLM através de todos os steps. Detalha o consumo por agente.
 /// </summary>
-public sealed class PipelineMetrics
+internal sealed class PipelineMetrics
 {
     public int StepsExecuted { get; private set; }
     public TokenUsage TotalTokens { get; private set; } = TokenUsage.Empty;

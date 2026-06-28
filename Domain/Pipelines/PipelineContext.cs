@@ -6,7 +6,7 @@ namespace Domain.Pipelines;
 /// Contexto mutável que atravessa a Pipeline. Carrega o valor corrente entre steps,
 /// o usuário, capabilities adicionais de runtime e a posição corrente.
 /// </summary>
-public sealed class PipelineContext
+internal sealed class PipelineContext
 {
     public PipelineId PipelineId { get; }
     public PipelineName PipelineName { get; }

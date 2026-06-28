@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 namespace AI.Pipelines.Enem;
 
 /// <summary>Pipeline: Validar → Logar → ExplainerAgent → Validar saída.</summary>
-public sealed class ExplainTopicPipeline : Pipeline<ExplainRequest, string>, IExplainTopicPipeline
+internal sealed class ExplainTopicPipeline : Pipeline<ExplainRequest, string>, IExplainTopicPipeline
 {
     public ExplainTopicPipeline(
         ExplainerAgent agent,

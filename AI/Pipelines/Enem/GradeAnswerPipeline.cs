@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 namespace AI.Pipelines.Enem;
 
 /// <summary>Pipeline: Validar → Logar → FeedbackAgent → Logar saída.</summary>
-public sealed class GradeAnswerPipeline : Pipeline<FeedbackRequest, FeedbackResult>, IGradeAnswerPipeline
+internal sealed class GradeAnswerPipeline : Pipeline<FeedbackRequest, FeedbackResult>, IGradeAnswerPipeline
 {
     public GradeAnswerPipeline(
         FeedbackAgent agent,

@@ -13,7 +13,7 @@ namespace AI.Pipelines.Enem;
 /// Pipeline: Validar → Logar → QuestionAgent → Validar saída.
 /// 100% POO — composta no construtor adicionando steps em sequência.
 /// </summary>
-public sealed class GenerateQuestionPipeline : Pipeline<QuestionRequest, EnemQuestion>, IGenerateQuestionPipeline
+internal sealed class GenerateQuestionPipeline : Pipeline<QuestionRequest, EnemQuestion>, IGenerateQuestionPipeline
 {
     public GenerateQuestionPipeline(
         QuestionAgent agent,

@@ -1,6 +1,6 @@
 namespace Domain.Configurations;
 
-public class DatabaseSettings
+internal class DatabaseSettings
 {
     public string Host { get; set; } = string.Empty;
     public int Port { get; set; } = 5432;

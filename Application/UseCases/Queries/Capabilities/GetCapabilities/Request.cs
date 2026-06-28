@@ -2,4 +2,4 @@ using MediatR;
 
 namespace Application.UseCases.Queries.Capabilities.GetCapabilities;
 
-public record Request : IRequest<Response>;
+internal record Request : IRequest<Response>;

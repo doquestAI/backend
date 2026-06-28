@@ -3,7 +3,7 @@ using Domain.ValueObjects;
 
 namespace Application.Mappers;
 
-public class ValueObjectsProfile : Profile
+internal class ValueObjectsProfile : Profile
 {
     public ValueObjectsProfile()
     {

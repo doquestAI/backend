@@ -7,4 +7,4 @@ namespace Application.UseCases.Commands.Capabilities.RegisterPlugin;
 /// (<c>AIFunction</c>) precisam ser provisionadas via DI na camada de Composition Root —
 /// este use case apenas reconhece o plugin como habilitado/desabilitado.
 /// </summary>
-public record Request(string Name, string Description, bool Enabled = true) : IRequest<Response>;
+internal record Request(string Name, string Description, bool Enabled = true) : IRequest<Response>;

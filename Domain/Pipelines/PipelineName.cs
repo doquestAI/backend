@@ -4,7 +4,7 @@ using Flunt.Validations;
 namespace Domain.Pipelines;
 
 /// <summary>Nome de negócio da Pipeline (ex: "GenerateEnemQuestion").</summary>
-public sealed class PipelineName : ValueObject
+internal sealed class PipelineName : ValueObject
 {
     public string Value { get; private set; } = string.Empty;
 
@@ -16,7 +16,8 @@ public sealed class PipelineName : ValueObject
                 .IsLowerOrEqualsThan(value?.Length ?? 0, 200, nameof(PipelineName),
                     "Pipeline name cannot exceed 200 characters"));
 
-        if (IsValid) Value = value!;
+        if (IsValid)
+            Value = value!;
     }
 
     public override string ToString() => Value;

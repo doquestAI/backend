@@ -1,6 +1,6 @@
 namespace Domain.Configurations;
 
-public sealed class AppSettings
+internal sealed class AppSettings
 {
     public string BackendUrl { get; set; } = string.Empty;
     public string FrontendUrl { get; set; } = string.Empty;

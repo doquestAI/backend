@@ -4,7 +4,7 @@ using Flunt.Validations;
 namespace Domain.Agents.ValueObjects;
 
 /// <summary>Instrução base do Agent (system prompt), validada por tamanho.</summary>
-public sealed class AgentSystemPrompt : ValueObject
+internal sealed class AgentSystemPrompt : ValueObject
 {
     public string? Value { get; private set; }
 

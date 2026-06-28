@@ -9,7 +9,7 @@ namespace AI.Common.Config;
 /// Usada pelo construtor de <c>AgentBase</c> para instanciar tanto a parte MAF
 /// (<see cref="ChatClientAgent"/>) quanto as propriedades de negócio.
 /// </summary>
-public sealed class AgentConfig
+internal sealed class AgentConfig
 {
     public required string Name { get; init; }
     public required string Description { get; init; }

@@ -3,7 +3,7 @@ using Flunt.Validations;
 
 namespace Domain.Pipelines;
 
-public sealed class StepName : ValueObject
+internal sealed class StepName : ValueObject
 {
     public string Value { get; private set; } = string.Empty;
 
@@ -15,7 +15,8 @@ public sealed class StepName : ValueObject
                 .IsLowerOrEqualsThan(value?.Length ?? 0, 200, nameof(StepName),
                     "Step name cannot exceed 200 characters"));
 
-        if (IsValid) Value = value!;
+        if (IsValid)
+            Value = value!;
     }
 
     public override string ToString() => Value;

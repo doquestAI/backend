@@ -6,7 +6,7 @@ namespace Domain.Sessions;
 /// Histórico de mensagens da sessão atual (short-term memory).
 /// O Agent consulta isto para saber o que foi dito antes.
 /// </summary>
-public sealed class ConversationMemory : Notifiable<Notification>
+internal sealed class ConversationMemory : Notifiable<Notification>
 {
     private readonly List<MemoryEntry> _entries = [];
 

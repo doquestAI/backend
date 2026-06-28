@@ -1,6 +1,6 @@
 namespace Domain.ValueObjects;
 
-public sealed record PromptTemplate(string Raw)
+internal sealed record PromptTemplate(string Raw)
 {
     public string Render(IReadOnlyDictionary<string, string> variables)
     {

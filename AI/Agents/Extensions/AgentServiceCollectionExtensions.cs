@@ -25,9 +25,9 @@ namespace AI.Agents.Extensions;
 /// e recebe um <see cref="AgentConfig"/> keyed via DI. Não há mais wrappers ou
 /// composição manual de inner+session+resolver.
 /// </summary>
-public static class AgentServiceCollectionExtensions
+internal static class AgentServiceCollectionExtensions
 {
-    public static IServiceCollection AddAgents(
+    internal static IServiceCollection AddAgents(
         this IServiceCollection services,
         Action<AgentInfraOptions> configure)
     {
@@ -52,15 +52,11 @@ public static class AgentServiceCollectionExtensions
                 .UseLogging();
         }
 
-        // ── IVectorStore (Qdrant, Azure AI Search, etc.) ────────────────────
-        if (infra.VectorStoreFactory is not null)
-            services.AddSingleton(infra.VectorStoreFactory);
-
         // ── Prompt provider keyed (File por padrão) ─────────────────────────
         services.AddKeyedSingleton<IPromptProvider, FilePromptProvider>(PromptProvider.File);
 
-        // ── Session cache e Capabilities ────────────────────────────────────
-        services.AddSingleton<AgentSessionCache>();
+        // ── Session store (DB-backed via IAgentSessionRepository) ───────────
+        services.AddScoped<AgentSessionStore>();
         services.AddAgentCapabilities();
 
         // ── Configuração keyed de cada Agent ENEM ───────────────────────────
@@ -173,9 +169,8 @@ public static class AgentServiceCollectionExtensions
     }
 }
 
-public sealed class AgentInfraOptions
+internal sealed class AgentInfraOptions
 {
     public IChatClient? ChatClientBuilder { get; set; }
     public IEmbeddingGenerator<string, Embedding<float>>? EmbeddingGeneratorBuilder { get; set; }
-    public Func<IServiceProvider, IVectorStore>? VectorStoreFactory { get; set; }
 }

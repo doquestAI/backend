@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 namespace AI.Agents.Enem;
 
 /// <summary>Corrige e avalia respostas do candidato.</summary>
-public sealed class FeedbackAgent(
+internal sealed class FeedbackAgent(
     IChatClient client,
     [FromKeyedServices(AgentKeys.Feedback)] AgentConfig config,
     AgentSessionCache sessionCache,

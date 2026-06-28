@@ -10,7 +10,7 @@ namespace Domain.Pipelines;
 /// Cada execução emite um span filho <c>Pipeline.Step/{Name}</c> dentro do span
 /// pai da Pipeline, via <see cref="PipelineTelemetry.Source"/>.
 /// </summary>
-public abstract class PipelineStep
+internal abstract class PipelineStep
 {
     public StepName Name { get; }
     public StepStatus Status { get; protected set; } = StepStatus.Pending;
@@ -72,8 +72,8 @@ public abstract class PipelineStep
             activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
             activity?.AddEvent(new ActivityEvent("exception", tags: new ActivityTagsCollection
             {
-                ["exception.type"]       = ex.GetType().FullName,
-                ["exception.message"]    = ex.Message,
+                ["exception.type"] = ex.GetType().FullName,
+                ["exception.message"] = ex.Message,
                 ["exception.stacktrace"] = ex.ToString()
             }));
 

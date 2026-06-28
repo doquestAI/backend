@@ -1,6 +1,6 @@
 namespace Domain.Configurations;
 
-public class AzureAdSettings
+internal class AzureAdSettings
 {
     public string Instance { get; set; } = "https://login.microsoftonline.com/";
     public string TenantId { get; set; } = string.Empty;

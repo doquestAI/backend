@@ -1,6 +1,6 @@
 namespace Domain.Interfaces.Context;
 
-public interface IUserContext
+internal interface IUserContext
 {
     Guid UserId { get; }
     string Role { get; }

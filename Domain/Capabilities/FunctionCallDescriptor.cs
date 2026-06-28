@@ -5,7 +5,7 @@ namespace Domain.Capabilities;
 /// Wrapper semântico sobre <c>AIFunction</c>/<c>AIFunctionMetadata</c> do MAF,
 /// mantendo o Domain livre da dependência do framework.
 /// </summary>
-public sealed class FunctionCallDescriptor
+internal sealed class FunctionCallDescriptor
 {
     public required string PluginName { get; init; }
     public required string FunctionName { get; init; }

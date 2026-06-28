@@ -1,6 +1,6 @@
 namespace Domain.Messages;
 
-public record EmbeddingCompletedMessage(
+internal record EmbeddingCompletedMessage(
     Guid DocumentId,
     bool Success,
     int ChunksGenerated,
@@ -9,6 +9,6 @@ public record EmbeddingCompletedMessage(
     string? ErrorMessage,
     EmbeddingMetadata? Metadata);
 
-public record EmbeddingMetadata(
+internal record EmbeddingMetadata(
     int TotalTokens,
     long ProcessingTimeMs);

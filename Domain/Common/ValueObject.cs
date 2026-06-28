@@ -12,4 +12,4 @@ namespace Domain.Common;
 /// servindo aos VOs legados (Email, Cpf, etc.). Esta base existe porque a
 /// camada AI precisa herdar/instanciar VOs do Domain.
 /// </summary>
-public abstract class ValueObject : Notifiable<Notification>;
+internal abstract class ValueObject : Notifiable<Notification>;

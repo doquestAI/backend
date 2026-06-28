@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 namespace AI.Agents.Enem;
 
 /// <summary>Explica teoria de tópicos do ENEM em detalhes.</summary>
-public sealed class ExplainerAgent(
+internal sealed class ExplainerAgent(
     IChatClient client,
     [FromKeyedServices(AgentKeys.Explainer)] AgentConfig config,
     AgentSessionCache sessionCache,

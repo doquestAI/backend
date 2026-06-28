@@ -4,7 +4,7 @@ namespace Domain.Interfaces.Vector;
 /// Armazenamento vetorial para RAG.
 /// Implementação concreta vive na camada AI/Infrastructure (Qdrant, Pinecone, Azure AI Search, etc.).
 /// </summary>
-public interface IVectorStore
+internal interface IVectorStore
 {
     Task UpsertAsync(
         string collection,
@@ -22,7 +22,7 @@ public interface IVectorStore
         CancellationToken ct = default);
 }
 
-public sealed record VectorSearchResult(
+internal sealed record VectorSearchResult(
     string Id,
     string Content,
     float Score,

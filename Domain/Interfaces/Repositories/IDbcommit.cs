@@ -1,6 +1,6 @@
 namespace Domain.Interfaces.Repositories;
 
-public interface IDbCommit
+internal interface IDbCommit
 {
     Task Commit(CancellationToken cancellationToken);
 }

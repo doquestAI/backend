@@ -1,6 +1,6 @@
 namespace Domain.Configurations;
 
-public class StripeSettings
+internal class StripeSettings
 {
     public string ApiKey { get; set; } = string.Empty;
     public string WebhookSecret { get; set; } = string.Empty;

@@ -1,6 +1,6 @@
 namespace Domain.Interfaces.Services;
 
-public interface ICloudStorageService
+internal interface ICloudStorageService
 {
     Task<string> UploadFileAsync(
         string containerName,

@@ -3,7 +3,7 @@ using System.Security.Claims;
 
 namespace Presentation.Adapters;
 
-public class HttpUserContext(IHttpContextAccessor httpContextAccessor) : IUserContext
+internal class HttpUserContext(IHttpContextAccessor httpContextAccessor) : IUserContext
 {
     private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 

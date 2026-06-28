@@ -1,13 +1,13 @@
 namespace Domain.Configurations;
 
-public sealed class CacheSettings
+internal sealed class CacheSettings
 {
     public CacheProvider Provider { get; set; } = CacheProvider.Memory;
     public int DefaultExpirationMinutes { get; set; } = 30;
     public RedisSettings? Redis { get; set; }
 }
 
-public sealed class RedisSettings
+internal sealed class RedisSettings
 {
     public string ConnectionString { get; set; } = string.Empty;
     public string InstanceName { get; set; } = "Doquest_";

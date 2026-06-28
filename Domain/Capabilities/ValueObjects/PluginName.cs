@@ -3,7 +3,7 @@ using Flunt.Validations;
 
 namespace Domain.Capabilities.ValueObjects;
 
-public sealed class PluginName : ValueObject
+internal sealed class PluginName : ValueObject
 {
     public string Value { get; private set; } = string.Empty;
 

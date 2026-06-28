@@ -5,9 +5,9 @@ using System.Reflection;
 namespace Presentation.Common;
 
 [ProducesBaseResponse]
-public class InternalControllerBase : Controller;
+internal class InternalControllerBase : Controller;
 
-public class CustomControllerFeatureProvider : ControllerFeatureProvider
+internal class CustomControllerFeatureProvider : ControllerFeatureProvider
 {
     protected override bool IsController(TypeInfo typeInfo)
     {
@@ -16,9 +16,9 @@ public class CustomControllerFeatureProvider : ControllerFeatureProvider
     }
 }
 
-public static class InternalControllersExtension
+internal static class InternalControllersExtension
 {
-    public static IMvcBuilder EnableInternalControllers(this IMvcBuilder builder)
+    internal static IMvcBuilder EnableInternalControllers(this IMvcBuilder builder)
     {
         builder.ConfigureApplicationPartManager(manager =>
         {
@@ -28,4 +28,4 @@ public static class InternalControllersExtension
     }
 }
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
-public class ProducesBaseResponseAttribute : Attribute { }
+internal class ProducesBaseResponseAttribute : Attribute { }

@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 namespace Domain.Pipelines.Steps;
 
 /// <summary>Step que registra o valor corrente via <see cref="ILogger"/>. Pass-through.</summary>
-public sealed class LoggingStep : PipelineStep
+internal sealed class LoggingStep : PipelineStep
 {
     private readonly ILogger _logger;
     private readonly Func<PipelineContext, string> _messageBuilder;

@@ -7,7 +7,7 @@ namespace AI.Exceptions;
 /// para cruzar a fronteira de camada quando absolutamente necessário (ex: precondição
 /// de DI violada). Fluxos normais devem usar <c>PipelineResult</c>.
 /// </summary>
-public sealed class DomainNotificationException : Exception
+internal sealed class DomainNotificationException : Exception
 {
     public IReadOnlyCollection<Notification> Notifications { get; }
 

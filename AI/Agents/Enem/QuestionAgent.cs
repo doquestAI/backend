@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 namespace AI.Agents.Enem;
 
 /// <summary>Gera questões estilo ENEM com gabarito.</summary>
-public sealed class QuestionAgent(
+internal sealed class QuestionAgent(
     IChatClient client,
     [FromKeyedServices(AgentKeys.QuestionGenerator)] AgentConfig config,
     AgentSessionCache sessionCache,

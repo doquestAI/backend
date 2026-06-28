@@ -10,7 +10,7 @@ namespace Domain.Interfaces.Agents;
 /// e também herda do <c>ChatClientAgent</c> do MAF — então pode ser invocado tanto
 /// pela API alto-nível desta interface quanto pelos métodos nativos do framework.
 /// </summary>
-public interface IAgent : IAgentAware
+internal interface IAgent : IAgentAware
 {
     /// <summary>
     /// Invoca o agente com um prompt textual. Retorna a resposta com métricas
@@ -31,7 +31,7 @@ public interface IAgent : IAgentAware
 /// e métricas acumuladas. Permite à Pipeline e à camada Application inspecionar
 /// o estado de qualquer Agent sem depender da implementação.
 /// </summary>
-public interface IAgentAware
+internal interface IAgentAware
 {
     AgentId AgentId { get; }
     AgentName AgentName { get; }
@@ -42,14 +42,15 @@ public interface IAgentAware
 }
 
 /// <summary>Input de uma invocação ao agent.</summary>
-public sealed record AgentInvocationInput(
+internal sealed record AgentInvocationInput(
     string Prompt,
     string? SessionKey = null,
     IReadOnlyList<PluginDescriptor>? RuntimePlugins = null,
-    IReadOnlyList<McpDescriptor>? RuntimeMcps = null);
+    IReadOnlyList<McpDescriptor>? RuntimeMcps = null,
+    bool UseRag = false);
 
 /// <summary>Saída de uma invocação ao agent.</summary>
-public sealed record AgentInvocationResult(
+internal sealed record AgentInvocationResult(
     string Text,
     TokenUsage Tokens,
     TimeSpan Latency);

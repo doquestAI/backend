@@ -1,6 +1,6 @@
 namespace Domain.Configurations;
 
-public class AzureSettings
+internal class AzureSettings
 {
     public string ConnectionString { get; set; } = string.Empty;
     public string ContainerDocuments { get; set; } = string.Empty;

@@ -16,9 +16,12 @@ internal class CoreDbContext(DbContextOptions<CoreDbContext> options) : DbContex
     public DbSet<PremiumSubscription> PremiumSubscriptions { get; init; }
     public DbSet<StripeWebhookEvent> StripeWebhookEvents { get; init; }
     public DbSet<AccountSubscription> AccountSubscriptions { get; init; }
+    public DbSet<AgentSessionRecord> AgentSessions { get; init; }
+    public DbSet<VectorItem> VectorItems { get; init; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.HasPostgresExtension("vector");
         modelBuilder.Ignore<Notification>();
         base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());

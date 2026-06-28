@@ -4,7 +4,7 @@ namespace Domain.Pipelines;
 /// Contagem de tokens consumidos em uma invocação ao LLM.
 /// Valor obtido do <c>UsageDetails</c> retornado pelo MAF/MEAI.
 /// </summary>
-public sealed class TokenUsage
+internal sealed class TokenUsage
 {
     public long InputTokens { get; }
     public long OutputTokens { get; }
@@ -16,7 +16,7 @@ public sealed class TokenUsage
         OutputTokens = outputTokens;
     }
 
-    public static TokenUsage Empty => new(0, 0);
+    internal static TokenUsage Empty => new(0, 0);
 
     public TokenUsage Add(TokenUsage other) =>
         new(InputTokens + other.InputTokens, OutputTokens + other.OutputTokens);

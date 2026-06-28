@@ -5,7 +5,7 @@ namespace Domain.Interfaces.Capabilities;
 /// registrar/desabilitar plugins lógicos sem conhecer a concretude da AI.
 /// Funções concretas (<c>AIFunction</c>) são provisionadas via DI no Composition Root.
 /// </summary>
-public interface IPluginRegistrar
+internal interface IPluginRegistrar
 {
     void RegisterEmpty(string name, string description, bool enabled = true);
 }

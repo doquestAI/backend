@@ -1,6 +1,6 @@
 namespace Domain.Agents;
 
-public sealed class AgentMetadata
+internal sealed class AgentMetadata
 {
     public string Description { get; }
     public IReadOnlyDictionary<string, string> Tags { get; }

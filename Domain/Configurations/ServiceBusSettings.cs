@@ -1,12 +1,12 @@
 namespace Domain.Configurations;
 
-public class ServiceBusSettings
+internal class ServiceBusSettings
 {
     public string ConnectionString { get; set; } = string.Empty;
     public ServiceBusQueueSettings Queues { get; set; } = new();
 }
 
-public class ServiceBusQueueSettings
+internal class ServiceBusQueueSettings
 {
     public string FileUpload { get; set; } = "file-upload";
     public string FileDelete { get; set; } = "file-delete";
