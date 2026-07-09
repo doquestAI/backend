@@ -1,5 +1,7 @@
 using Domain.Entities.Abstracts;
 using Domain.Entities.Core;
+using Domain.Entities.Core.Chat;
+using Domain.Entities.Core.Documents;
 using Domain.Entities.Core.Subscriptions;
 using Domain.Entities.Payments;
 using Flunt.Notifications;
@@ -11,6 +13,9 @@ namespace Infrastructure.Data;
 internal class CoreDbContext(DbContextOptions<CoreDbContext> options) : DbContext(options)
 {
     public DbSet<Document> Documents { get; init; }
+    public DbSet<Chunk> Chunks { get; init; }
+    public DbSet<ChatSession> ChatSessions { get; init; }
+    public DbSet<ChatMessage> ChatMessages { get; init; }
     public DbSet<Subscription> Subscriptions { get; init; }
     public DbSet<FreeSubscription> FreeSubscriptions { get; init; }
     public DbSet<PremiumSubscription> PremiumSubscriptions { get; init; }
@@ -23,6 +28,7 @@ internal class CoreDbContext(DbContextOptions<CoreDbContext> options) : DbContex
     {
         modelBuilder.HasPostgresExtension("vector");
         modelBuilder.Ignore<Notification>();
+        modelBuilder.Ignore<VectorItem>();
         base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
     }

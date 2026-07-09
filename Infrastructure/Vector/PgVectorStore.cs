@@ -18,7 +18,7 @@ internal sealed class PgVectorStore(CoreDbContext db, ILogger<PgVectorStore> log
         IDictionary<string, string>? metadata = null,
         CancellationToken ct = default)
     {
-        var vector = new Vector(embedding.ToArray());
+        var vector = new Pgvector.Vector(embedding.ToArray());
         var metaJson = JsonSerializer.Serialize(metadata ?? new Dictionary<string, string>());
 
         var existing = await db.VectorItems
@@ -56,7 +56,7 @@ internal sealed class PgVectorStore(CoreDbContext db, ILogger<PgVectorStore> log
         float threshold = 0.75f,
         CancellationToken ct = default)
     {
-        var query = new Vector(queryEmbedding.ToArray());
+        var query = new Pgvector.Vector(queryEmbedding.ToArray());
         var distanceThreshold = (double)(1f - threshold);
 
         var items = await db.VectorItems
