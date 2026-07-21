@@ -1,25 +1,39 @@
-using Domain.Common;
-using Flunt.Validations;
+using Domain.Shared.Core;
 
 namespace Domain.Agents.ValueObjects;
 
-/// <summary>Instrução base do Agent (system prompt), validada por tamanho.</summary>
-internal sealed class AgentSystemPrompt : ValueObject
+/// <summary>
+/// System prompt que instrui o agente (LLM).
+/// Imutável, validado quanto a tamanho máximo (32k chars = limite Claude).
+/// </summary>
+public sealed class AgentSystemPrompt : ValueObject
 {
-    public string? Value { get; private set; }
+    private const int MaxLength = 32000;
+
+    public string Value { get; private set; } = null!;
 
     public AgentSystemPrompt(string prompt)
     {
-        AddNotifications(
-            new Contract<AgentSystemPrompt>()
-                .IsNotNullOrEmpty(prompt, nameof(AgentSystemPrompt),
-                    "System prompt cannot be empty")
-                .IsLowerOrEqualsThan(prompt?.Length ?? 0, 32000, nameof(AgentSystemPrompt),
-                    "System prompt cannot exceed 32000 characters"));
+        if (string.IsNullOrWhiteSpace(prompt))
+        {
+            AddNotification(nameof(AgentSystemPrompt), "System prompt cannot be empty");
+            return;
+        }
 
-        if (IsValid)
-            Value = prompt;
+        if (prompt.Length > MaxLength)
+        {
+            AddNotification(nameof(AgentSystemPrompt),
+                $"System prompt cannot exceed {MaxLength} characters");
+            return;
+        }
+
+        Value = prompt;
     }
 
-    public override string ToString() => Value ?? string.Empty;
+    public override bool Equals(object? obj) =>
+        obj is AgentSystemPrompt other && Value == other.Value;
+
+    public override int GetHashCode() => Value.GetHashCode();
+
+    public override string ToString() => Value;
 }
